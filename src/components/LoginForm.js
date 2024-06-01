@@ -45,6 +45,7 @@ const LoginForm = ({ onLogin }) => {
                                 <Form.Group controlId="email-input" className="mb-2">
                                     <Form.Control
                                         type="email"
+                                        className='text-center'
                                         placeholder="Enter your email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -61,6 +62,7 @@ const LoginForm = ({ onLogin }) => {
                                         type="text"
                                         placeholder="Enter login code"
                                         value={loginCode}
+                                        className='text-center'
                                         onChange={(e) => setLoginCode(e.target.value)}
                                     />
                                 </Form.Group>
