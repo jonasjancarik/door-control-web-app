@@ -75,7 +75,7 @@ const Settings = () => {
                 <h2>Settings</h2>
                 <Form className="w-100">
                     <Row>
-                        <Col>
+                        <Col className='col-md-8'>
                             <h4>User Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>Email</Form.Label>
@@ -106,7 +106,7 @@ const Settings = () => {
                             <Button onClick={handleUserSubmit}>Add User</Button>
                             {userStatus && <div className="mt-3">{userStatus}</div>}
                         </Col>
-                        <Col>
+                        {/* <Col>
                             <h4>PIN Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>PIN</Form.Label>
@@ -128,7 +128,7 @@ const Settings = () => {
                             </Form.Group>
                             <Button onClick={handlePinSubmit}>Submit PIN</Button>
                             {pinStatus && <div className="mt-3">{pinStatus}</div>}
-                        </Col>
+                        </Col> */}
                     </Row>
                 </Form>
             </Container>
