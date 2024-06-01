@@ -12,7 +12,7 @@ const AppNavbar = ({ user, onLogout }) => {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
             <Container>
-                <Navbar.Brand>{process.env.NEXT_PUBLIC_WEB_APP_TITLE}</Navbar.Brand>
+                <Navbar.Brand as={Link} href="/">{process.env.NEXT_PUBLIC_WEB_APP_TITLE}</Navbar.Brand>
                 {isAuthenticated && user ? <react-fragment>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
@@ -20,9 +20,8 @@ const AppNavbar = ({ user, onLogout }) => {
                             <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                             <>
                                 <Nav.Link as={Link} href="/settings">Settings</Nav.Link>
-                                <Nav.Link>{user.name}</Nav.Link>
                                 <Nav.Link onClick={onLogout} style={{ cursor: 'pointer' }}>
-                                    (Logout)
+                                    {user.name} (Logout)
                                 </Nav.Link>
                             </>
                         </Nav>
