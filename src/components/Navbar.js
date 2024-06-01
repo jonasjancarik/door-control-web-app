@@ -1,9 +1,8 @@
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 const AppNavbar = ({ user, onLogout }) => {
-    const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
@@ -20,6 +19,7 @@ const AppNavbar = ({ user, onLogout }) => {
                         <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                         {isAuthenticated ? (
                             <>
+                                <Nav.Link as={Link} href="/settings">Settings</Nav.Link>
                                 <Nav.Link>{user.name}</Nav.Link>
                                 <Nav.Link onClick={onLogout} style={{ cursor: 'pointer' }}>
                                     (Logout)

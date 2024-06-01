@@ -3,10 +3,12 @@ import AppNavbar from '../components/Navbar';
 import LoginForm from '../components/LoginForm';
 import UnlockButton from '../components/UnlockButton';
 import { Container } from 'react-bootstrap';
+import { useRouter } from 'next/router';
 
 const Home = () => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
@@ -29,6 +31,7 @@ const Home = () => {
         setUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        router.push('/');
     };
 
     return (
