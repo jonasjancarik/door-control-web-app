@@ -13,11 +13,11 @@ const AppNavbar = ({ user, onLogout }) => {
         <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
             <Container>
                 <Navbar.Brand>{process.env.NEXT_PUBLIC_WEB_APP_TITLE}</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ms-auto">
-                        <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
-                        {isAuthenticated ? (
+                {isAuthenticated && user ? <react-fragment>
+                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                    <Navbar.Collapse id="basic-navbar-nav">
+                        <Nav className="ms-auto">
+                            <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                             <>
                                 <Nav.Link as={Link} href="/settings">Settings</Nav.Link>
                                 <Nav.Link>{user.name}</Nav.Link>
@@ -25,9 +25,9 @@ const AppNavbar = ({ user, onLogout }) => {
                                     (Logout)
                                 </Nav.Link>
                             </>
-                        ) : null}
-                    </Nav>
-                </Navbar.Collapse>
+                        </Nav>
+                    </Navbar.Collapse>
+                </react-fragment> : null}
             </Container>
         </Navbar>
     );
