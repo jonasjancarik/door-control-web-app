@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import AppNavbar from '../components/Navbar';
@@ -11,6 +11,19 @@ const Settings = () => {
     const [pinLabel, setPinLabel] = useState('');
     const [userStatus, setUserStatus] = useState('');
     const [pinStatus, setPinStatus] = useState('');
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState('');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            const storedToken = localStorage.getItem('token');
+            if (storedUser && storedToken) {
+                setUser(storedUser);
+                setToken(storedToken);
+            }
+        }
+    }, []);
 
     const handleUserSubmit = async () => {
         if (!userEmail) {
@@ -22,7 +35,7 @@ const Settings = () => {
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/create`, newUser, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             if (response.status === 200) {
@@ -55,7 +68,7 @@ const Settings = () => {
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pin/create`, pinData, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             if (response.status === 200) {
@@ -70,12 +83,12 @@ const Settings = () => {
 
     return (
         <div className="d-flex flex-column vh-100">
-            <AppNavbar user={JSON.parse(localStorage.getItem('user'))} onLogout={() => { }} />
+            <AppNavbar user={user} onLogout={() => { }} />
             <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
                 <h2>Settings</h2>
                 <Form className="w-100">
                     <Row>
-                        <Col className='col-md-8'>
+                        <Col>
                             <h4>User Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>Email</Form.Label>
@@ -106,7 +119,7 @@ const Settings = () => {
                             <Button onClick={handleUserSubmit}>Add User</Button>
                             {userStatus && <div className="mt-3">{userStatus}</div>}
                         </Col>
-                        {/* <Col>
+                        <Col>
                             <h4>PIN Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>PIN</Form.Label>
@@ -128,7 +141,7 @@ const Settings = () => {
                             </Form.Group>
                             <Button onClick={handlePinSubmit}>Submit PIN</Button>
                             {pinStatus && <div className="mt-3">{pinStatus}</div>}
-                        </Col> */}
+                        </Col>
                     </Row>
                 </Form>
             </Container>
