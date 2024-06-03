@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { useRouter } from 'next/router';
 import axios from 'axios';
 
 const LoginForm = ({ onLogin }) => {
@@ -7,6 +8,17 @@ const LoginForm = ({ onLogin }) => {
     const [loginCode, setLoginCode] = useState('');
     const [emailSent, setEmailSent] = useState(false);
     const [emailStatus, setEmailStatus] = useState('');
+
+    const router = useRouter();
+
+    useEffect(() => {
+        // Extract login code from URL if present
+        const { login_code } = router.query;
+        if (login_code) {
+            setLoginCode(login_code);
+            handleLogin(login_code); // Automatically send the exchange code request
+        }
+    }, [router.query, handleLogin]);
 
     const handleSendLink = async () => {
         try {
@@ -22,9 +34,9 @@ const LoginForm = ({ onLogin }) => {
         }
     };
 
-    const handleLogin = async () => {
+    const handleLogin = useCallback(async (code) => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/exchange-code`, { login_code: loginCode });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/exchange-code`, { login_code: code || loginCode });
             if (response.status === 200) {
                 onLogin(response.data.access_token, response.data.user);
             } else {
@@ -43,7 +55,7 @@ const LoginForm = ({ onLogin }) => {
                 setEmailStatus('Failed to connect to the API.');
             }
         }
-    };
+    }, [loginCode, onLogin]);
 
     return (
         <Container>
@@ -76,7 +88,7 @@ const LoginForm = ({ onLogin }) => {
                                         onChange={(e) => setLoginCode(e.target.value)}
                                     />
                                 </Form.Group>
-                                <Button variant="secondary" onClick={handleLogin} disabled={!loginCode} className="w-100">
+                                <Button variant="secondary" onClick={() => handleLogin()} disabled={!loginCode} className="w-100">
                                     Login
                                 </Button>
                             </>
