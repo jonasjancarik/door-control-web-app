@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 
@@ -8,6 +8,7 @@ const LoginForm = ({ onLogin }) => {
     const [loginCode, setLoginCode] = useState('');
     const [emailSent, setEmailSent] = useState(false);
     const [emailStatus, setEmailStatus] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const router = useRouter();
 
@@ -43,6 +44,7 @@ const LoginForm = ({ onLogin }) => {
     }, [router.query, handleLogin]);
 
     const handleSendLink = async () => {
+        setLoading(true);
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/send-magic-link`, { email });
             if (response.status === 200) {
@@ -53,6 +55,8 @@ const LoginForm = ({ onLogin }) => {
             }
         } catch (error) {
             setEmailStatus('Failed to connect to the API.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,10 +74,11 @@ const LoginForm = ({ onLogin }) => {
                                         placeholder="Enter your email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
+                                        disabled={loading}
                                     />
                                 </Form.Group>
-                                <Button variant="secondary" onClick={handleSendLink} className="w-100">
-                                    Send Login Code
+                                <Button variant="secondary" onClick={handleSendLink} className="w-100" disabled={loading}>
+                                    {loading ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : 'Send Login Code'}
                                 </Button>
                             </>
                         ) : (
