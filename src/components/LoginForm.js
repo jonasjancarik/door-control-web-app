@@ -11,29 +11,6 @@ const LoginForm = ({ onLogin }) => {
 
     const router = useRouter();
 
-    useEffect(() => {
-        // Extract login code from URL if present
-        const { login_code } = router.query;
-        if (login_code) {
-            setLoginCode(login_code);
-            handleLogin(login_code); // Automatically send the exchange code request
-        }
-    }, [router.query, handleLogin]);
-
-    const handleSendLink = async () => {
-        try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/send-magic-link`, { email });
-            if (response.status === 200) {
-                setEmailStatus('A login code has been sent to your email.');
-                setEmailSent(true);
-            } else {
-                setEmailStatus('Failed to send email.');
-            }
-        } catch (error) {
-            setEmailStatus('Failed to connect to the API.');
-        }
-    };
-
     const handleLogin = useCallback(async (code) => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/exchange-code`, { login_code: code || loginCode });
@@ -56,6 +33,28 @@ const LoginForm = ({ onLogin }) => {
             }
         }
     }, [loginCode, onLogin]);
+
+    useEffect(() => {
+        const { login_code } = router.query;
+        if (login_code) {
+            setLoginCode(login_code);
+            handleLogin(login_code); // Automatically send the exchange code request
+        }
+    }, [router.query, handleLogin]);
+
+    const handleSendLink = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/send-magic-link`, { email });
+            if (response.status === 200) {
+                setEmailStatus('A login code has been sent to your email.');
+                setEmailSent(true);
+            } else {
+                setEmailStatus('Failed to send email.');
+            }
+        } catch (error) {
+            setEmailStatus('Failed to connect to the API.');
+        }
+    };
 
     return (
         <Container>
