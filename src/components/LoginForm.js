@@ -31,7 +31,17 @@ const LoginForm = ({ onLogin }) => {
                 setEmailStatus('Failed to login.');
             }
         } catch (error) {
-            setEmailStatus('Failed to connect to the API.');
+            if (error.response) {
+                if (error.response.status === 400) {
+                    setEmailStatus('Invalid login code.');
+                } else if (error.response.status === 401) {
+                    setEmailStatus('Invalid or expired login code.');
+                } else {
+                    setEmailStatus('Failed to connect to the API.');
+                }
+            } else {
+                setEmailStatus('Failed to connect to the API.');
+            }
         }
     };
 
@@ -66,7 +76,7 @@ const LoginForm = ({ onLogin }) => {
                                         onChange={(e) => setLoginCode(e.target.value)}
                                     />
                                 </Form.Group>
-                                <Button variant="secondary" onClick={handleLogin} className="w-100">
+                                <Button variant="secondary" onClick={handleLogin} disabled={!loginCode} className="w-100">
                                     Login
                                 </Button>
                             </>
