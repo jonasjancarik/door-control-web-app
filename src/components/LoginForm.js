@@ -48,7 +48,7 @@ const LoginForm = ({ onLogin }) => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/send-magic-link`, { email });
             if (response.status === 200) {
-                setEmailStatus('A login code has been sent to your email.');
+                setEmailStatus('A login code has been sent to your email.');  // todo: for gmail, present a search link like https://mail.google.com/mail/u/0/#search/from%3A(SENDER_EMAIL)+in%3Aanywhere+newer_than%3A1h/FMfcgzQVwxCxvfkGZtQpSWXqSlNdncJH
                 setEmailSent(true);
             } else {
                 setEmailStatus('Failed to send email.');
