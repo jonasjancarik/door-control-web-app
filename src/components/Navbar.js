@@ -12,15 +12,16 @@ const AppNavbar = ({ user, onLogout }) => {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
             <Container>
-                <Navbar.Brand as={Link} href="/">{process.env.NEXT_PUBLIC_WEB_APP_TITLE}</Navbar.Brand>
+                <Navbar.Brand className='mb-auto' as={Link} href="/">{process.env.NEXT_PUBLIC_WEB_APP_TITLE}</Navbar.Brand>
                 {isAuthenticated && user ? <react-fragment>
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav className="ms-auto">
+                    {/*  className="d-block ms-auto" works to fix the button alignment but breaks it on larger screens   */}
+                    <Navbar.Toggle aria-controls="basic-navbar-nav"/>  
+                    <Navbar.Collapse id="basic-navbar-nav" >
+                        <Nav>
                             <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                             <>
-                                <Nav.Link as={Link} href="/settings">Settings</Nav.Link>
-                                <Nav.Link onClick={onLogout} style={{ cursor: 'pointer' }}>
+                                <Nav.Link className="ms-auto" as={Link} href="/settings">Settings</Nav.Link>
+                                <Nav.Link className="ms-auto" onClick={onLogout} style={{ cursor: 'pointer' }}>
                                     {user.name} (Logout)
                                 </Nav.Link>
                             </>

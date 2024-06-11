@@ -31,6 +31,13 @@ const Settings = () => {
             return;
         }
 
+        // check if the email is valid
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // todo: use email-validator instead
+        if (!emailRegex.test(userEmail)) {
+            setUserStatus('Please enter a valid email address.');
+            return;
+        }
+
         const newUser = { email: userEmail, name: userName || userEmail, guest: isGuest };
 
         try {
@@ -81,15 +88,23 @@ const Settings = () => {
         }
     };
 
+    const handleLogout = () => {
+        setToken('');
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/');
+    };
+
     return (
-        <div className="d-flex flex-column vh-100">
-            <AppNavbar user={user} onLogout={() => { }} />
+        <div className="d-flex flex-column-reverse flex-md-column vh-100">
+            <AppNavbar user={user} onLogout={handleLogout} />
             <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
                 <h2>Settings</h2>
                 <Form className="w-100">
                     <Row>
                         <Col>
-                            <h4>User Registration</h4>
+                            <h4 className="mt-5">User Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control
@@ -118,9 +133,8 @@ const Settings = () => {
                             </Form.Group>
                             <Button onClick={handleUserSubmit}>Add User</Button>
                             {userStatus && <div className="mt-3">{userStatus}</div>}
-                        </Col>
-                        <Col>
-                            <h4>PIN Registration</h4>
+
+                            <h4 className='mt-5'>PIN Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>PIN</Form.Label>
                                 <Form.Control

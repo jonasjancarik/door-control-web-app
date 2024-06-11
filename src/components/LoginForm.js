@@ -54,6 +54,13 @@ const LoginForm = ({ onLogin }) => {
                 setEmailStatus('Failed to send email.');
             }
         } catch (error) {
+            if (error.response) {
+                if (error.response.status === 422) {
+                    setEmailStatus('Invalid email address.');
+                } else {
+                    setEmailStatus('An error ocurred: ' + error.response.data.message);
+                }
+            }
             setEmailStatus('Failed to connect to the API.');
         } finally {
             setLoading(false);
