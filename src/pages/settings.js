@@ -13,6 +13,7 @@ const Settings = () => {
     const [rfidLabel, setRfidLabel] = useState('');
     const [userStatus, setUserStatus] = useState('');
     const [pinStatus, setPinStatus] = useState('');
+    const [rfidReadStatus, setRfidReadStatus] = useState('');
     const [rfidStatus, setRfidStatus] = useState('');
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
@@ -94,7 +95,7 @@ const Settings = () => {
     const handleRfidRead = async () => {
         setIsLoading(true);
         try {
-            setRfidStatus(null);
+            setRfidReadStatus(null);
 
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rfid/read`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -103,16 +104,16 @@ const Settings = () => {
 
             if (response.status === 200) {
                 if (!response.data.uuid) {
-                    setRfidStatus('RFID tag not scanned.');  // this shouldn't happen on the API side
+                    setRfidReadStatus('RFID tag not scanned.');  // this shouldn't happen on the API side
                 }
                 setRfidUuid(response.data.uuid);
-                setRfidStatus(null);
+                setRfidReadStatus(null);
             }
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                setRfidStatus('RFID tag not scanned.');
+                setRfidReadStatus('RFID tag not scanned.');
             } else {
-                setRfidStatus('Failed to connect to the API.');
+                setRfidReadStatus('Failed to connect to the API.');
             }
         } finally {
             setIsLoading(false);
@@ -138,7 +139,13 @@ const Settings = () => {
                 setRfidStatus('Failed to register RFID.');
             }
         } catch (error) {
-            setRfidStatus('Failed to connect to the API.');
+            if (error.response && error.response.status === 401) {
+                setRfidStatus('Unauthorized. Try logging in again.')
+            } else {
+                console.log(error.response);
+                const errorMessage = error.response && error.response.data && error.response.data.detail ? JSON.stringify(error.response.data.detail) : 'Failed to connect to the API.';
+                setRfidStatus(`Failed to register RFID: ${errorMessage}`);
+            }
         }
     };
 
@@ -195,7 +202,7 @@ const Settings = () => {
                                         {isLoading ? <Spinner as="span" animation="border" size="sm" /> : 'Read RFID'}
                                     </Button>
                                 </InputGroup>
-                                {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
+                                {rfidReadStatus && <Alert variant='danger' className="mt-3 p-2">{rfidReadStatus}</Alert>}
                             </Form.Group>
                             <Form.Group className="mb-2">
                                 <Form.Label>RFID Label</Form.Label>
@@ -207,6 +214,7 @@ const Settings = () => {
                                 />
                             </Form.Group>
                             <Button onClick={handleRfidSubmit}>Submit RFID</Button>
+                            {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
 
                             <h4 className='mt-5'>PIN Registration</h4>
                             <Form.Group className="mb-2">

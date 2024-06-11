@@ -17,6 +17,26 @@ const Home = () => {
             setToken(storedToken);
             setUser(storedUser);
         }
+    }, [router.asPath]);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const storedToken = localStorage.getItem('token');
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            if (storedToken && storedUser) {
+                setToken(storedToken);
+                setUser(storedUser);
+            } else {
+                setToken('');
+                setUser(null);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
     }, []);
 
     const handleLogin = (token, user) => {
@@ -26,9 +46,17 @@ const Home = () => {
         localStorage.setItem('user', JSON.stringify(user));
     };
 
+    const handleLogout = () => {
+        setToken('');
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/');
+    };
+
     return (
         <div className="d-flex flex-column-reverse flex-md-column vh-100">
-            <AppNavbar user={user} />
+            <AppNavbar user={user} onLogout={handleLogout} />
             <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
                 {!user ? (
                     <LoginForm onLogin={handleLogin} />
