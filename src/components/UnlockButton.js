@@ -28,14 +28,23 @@ const UnlockButton = ({ token }) => {
                     setIsButtonDisabled(false);
                     setStatus("Unlock Door");
                 }, 7000);
-            } else {
+            } else {  // edge case, errors should be caught by the catch block
                 setStatus('Failed to unlock door');
                 resetButton();
             }
         } catch (error) {
             if (error.response) {
-                console.log(error.response);
-                setStatus(error.response.data.message || 'Failed to connect to the lock');
+                if (error.response.status) {
+                    if (error.response.status === 401) {
+                        setStatus('You are not authorized to unlock the door. Try logging in again.');
+                    } else {
+                        console.log(error.response);
+                        setStatus(error.response.data.detail || 'Failed to connect to the lock');
+                    }
+                } else {
+                    console.log(error.response);
+                    setStatus(error.response.data.detail || 'Failed to connect to the lock');
+                }
             } else {
                 setStatus('Failed to connect to the lock');
             }
