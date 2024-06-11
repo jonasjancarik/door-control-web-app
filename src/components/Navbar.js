@@ -26,7 +26,7 @@ const AppNavbar = ({ user }) => {
                     <>
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <Navbar.Collapse id="basic-navbar-nav">
-                            <Nav>
+                            <Nav className='ms-auto'>
                                 <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                                 <Nav.Link className="ms-auto" as={Link} href="/settings">Settings</Nav.Link>
                                 <Nav.Link className="ms-auto" onClick={handleLogout} style={{ cursor: 'pointer' }}>
