@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Form, Button, Row, Col } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, InputGroup, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import AppNavbar from '../components/Navbar';
 
@@ -9,10 +9,14 @@ const Settings = () => {
     const [isGuest, setIsGuest] = useState(false);
     const [pin, setPin] = useState('');
     const [pinLabel, setPinLabel] = useState('');
+    const [rfidUuid, setRfidUuid] = useState('');
+    const [rfidLabel, setRfidLabel] = useState('');
     const [userStatus, setUserStatus] = useState('');
     const [pinStatus, setPinStatus] = useState('');
+    const [rfidStatus, setRfidStatus] = useState('');
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -31,7 +35,6 @@ const Settings = () => {
             return;
         }
 
-        // check if the email is valid
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // todo: use email-validator instead
         if (!emailRegex.test(userEmail)) {
             setUserStatus('Please enter a valid email address.');
@@ -87,7 +90,58 @@ const Settings = () => {
             setPinStatus('Failed to connect to the API.');
         }
     };
-  
+
+    const handleRfidRead = async () => {
+        setIsLoading(true);
+        try {
+            setRfidStatus(null);
+
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rfid/read`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { timeout: 5000 },
+            });
+
+            if (response.status === 200) {
+                if (!response.data.uuid) {
+                    setRfidStatus('RFID tag not scanned.');  // this shouldn't happen on the API side
+                }
+                setRfidUuid(response.data.uuid);
+                setRfidStatus(null);
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                setRfidStatus('RFID tag not scanned.');
+            } else {
+                setRfidStatus('Failed to connect to the API.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRfidSubmit = async () => {
+        if (!rfidUuid) {
+            setRfidStatus('Please enter an RFID UUID.');
+            return;
+        }
+
+        const rfidData = { uuid: rfidUuid, label: rfidLabel || new Date().toISOString() };
+
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfid/create`, rfidData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.status === 200) {
+                setRfidStatus('RFID successfully registered.');
+            } else {
+                setRfidStatus('Failed to register RFID.');
+            }
+        } catch (error) {
+            setRfidStatus('Failed to connect to the API.');
+        }
+    };
+
     return (
         <div className="d-flex flex-column-reverse flex-md-column vh-100">
             <AppNavbar user={user} />
@@ -125,6 +179,34 @@ const Settings = () => {
                             </Form.Group>
                             <Button onClick={handleUserSubmit}>Add User</Button>
                             {userStatus && <div className="mt-3">{userStatus}</div>}
+
+                            <h4 className="mt-5">RFID Registration</h4>
+                            <Form.Group className="mb-2">
+                                <Form.Label>RFID UUID</Form.Label>
+                                <InputGroup>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter RFID UUID"
+                                        value={rfidUuid}
+                                        onChange={(e) => setRfidUuid(e.target.value)}
+                                        disabled={isLoading}
+                                    />
+                                    <Button onClick={handleRfidRead} disabled={isLoading}>
+                                        {isLoading ? <Spinner as="span" animation="border" size="sm" /> : 'Read RFID'}
+                                    </Button>
+                                </InputGroup>
+                                {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Label>RFID Label</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter RFID label"
+                                    value={rfidLabel}
+                                    onChange={(e) => setRfidLabel(e.target.value)}
+                                />
+                            </Form.Group>
+                            <Button onClick={handleRfidSubmit}>Submit RFID</Button>
 
                             <h4 className='mt-5'>PIN Registration</h4>
                             <Form.Group className="mb-2">
