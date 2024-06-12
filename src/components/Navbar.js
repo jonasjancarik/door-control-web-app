@@ -20,7 +20,7 @@ const AppNavbar = ({ user }) => {
 
     return (
         <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
-            <Container>
+            <Container fluid>
                 <Navbar.Brand className='mb-auto' as={Link} href="/">{process.env.NEXT_PUBLIC_WEB_APP_TITLE}</Navbar.Brand>
                 {isAuthenticated && user ? (
                     <>

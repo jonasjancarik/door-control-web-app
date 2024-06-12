@@ -152,100 +152,102 @@ const Settings = () => {
     return (
         <div className="d-flex flex-column-reverse flex-md-column vh-100 dvh-100">
             <AppNavbar user={user} />
-            <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center overflow-auto">
-                <h2>Settings</h2>
-                <Form className="w-100">
-                    <Row className='mt-5'>
-                        <Col className='mt-5'>
-                            <div className="border rounded-1 p-2 mt-5">
-                            <h4>User Registration</h4>
-                            <Form.Group className="mb-2">
-                                <Form.Label>Email</Form.Label>
-                                <Form.Control
-                                    type="email"
-                                    placeholder="Enter user email"
-                                    value={userEmail}
-                                    onChange={(e) => setUserEmail(e.target.value)}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-2">
-                                <Form.Label>Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter user name"
-                                    value={userName}
-                                    onChange={(e) => setUserName(e.target.value)}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-2">
-                                <Form.Check
-                                    type="checkbox"
-                                    label="Guest (won't be able to add other users)"
-                                    checked={isGuest}
-                                    onChange={(e) => setIsGuest(e.target.checked)}
-                                />
-                            </Form.Group>
-                            <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleUserSubmit}>Add User</Button>
-                            {userStatus && <div className="mt-3">{userStatus}</div>}
-                            </div>
-                            <div className="border rounded-1 p-2 mt-5">
-                            <h4>RFID Registration</h4>
-                            <Form.Group className="mb-2">
-                                <Form.Label>RFID UUID</Form.Label>
-                                <InputGroup>
+            <Container fluid className='overflow-auto'>
+                <Row className="d-flex flex-grow-1 flex-column justify-content-center align-items-center py-5">
+                    <Col className="w-100">
+                        <h2>Settings</h2>
+                        <Form className="w-100">
+
+                            <div className="border rounded-1 p-2 mt-4">
+                                <h3>User Registration</h3>
+                                <Form.Group className="mb-2">
+                                    <Form.Label>Email</Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        placeholder="Enter user email"
+                                        value={userEmail}
+                                        onChange={(e) => setUserEmail(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-2">
+                                    <Form.Label>Name</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Enter RFID UUID"
-                                        value={rfidUuid}
-                                        onChange={(e) => setRfidUuid(e.target.value)}
-                                        disabled={isLoading}
+                                        placeholder="Enter user name"
+                                        value={userName}
+                                        onChange={(e) => setUserName(e.target.value)}
                                     />
-                                    <Button variant="outline-secondary" onClick={handleRfidRead} disabled={isLoading}>
-                                        {isLoading ? <Spinner as="span" animation="border" size="sm" /> : 'Read RFID'}
-                                    </Button>
-                                </InputGroup>
-                                {rfidReadStatus && <Alert variant='danger' className="mt-3 p-2">{rfidReadStatus}</Alert>}
-                            </Form.Group>
-                            <Form.Group className="mb-2">
-                                <Form.Label>RFID Label</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter RFID label"
-                                    value={rfidLabel}
-                                    onChange={(e) => setRfidLabel(e.target.value)}
-                                />
-                            </Form.Group>
-                            <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleRfidSubmit}>Register RFID</Button>
-                            {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
+                                </Form.Group>
+                                <Form.Group className="mb-2">
+                                    <Form.Check
+                                        type="checkbox"
+                                        label="Guest (won't be able to add other users)"
+                                        checked={isGuest}
+                                        onChange={(e) => setIsGuest(e.target.checked)}
+                                    />
+                                </Form.Group>
+                                <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleUserSubmit}>Add User</Button>
+                                {userStatus && <div className="mt-3">{userStatus}</div>}
                             </div>
                             <div className="border rounded-1 p-2 mt-5">
-                            <h4>PIN Registration</h4>
-                            <Form.Group className="mb-2">
-                                <Form.Label>PIN</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    placeholder="Enter 4-digit PIN"
-                                    value={pin}
-                                    onChange={(e) => setPin(e.target.value)}
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-2">
-                                <Form.Label>PIN Label</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter PIN label"
-                                    value={pinLabel}
-                                    onChange={(e) => setPinLabel(e.target.value)}
-                                />
-                            </Form.Group>
-                            <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handlePinSubmit}>Add PIN</Button>
-                            {pinStatus && <div className="mt-3">{pinStatus}</div>}
+                                <h3>RFID Registration</h3>
+                                <Form.Group className="mb-2">
+                                    <Form.Label>RFID UUID</Form.Label>
+                                    <InputGroup>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Enter RFID UUID"
+                                            value={rfidUuid}
+                                            onChange={(e) => setRfidUuid(e.target.value)}
+                                            disabled={isLoading}
+                                        />
+                                        <Button variant="outline-secondary" onClick={handleRfidRead} disabled={isLoading}>
+                                            {isLoading ? <Spinner as="span" animation="border" size="sm" /> : 'Read RFID'}
+                                        </Button>
+                                    </InputGroup>
+                                    {rfidReadStatus && <Alert variant='danger' className="mt-3 p-2">{rfidReadStatus}</Alert>}
+                                </Form.Group>
+                                <Form.Group className="mb-2">
+                                    <Form.Label>RFID Label</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter RFID label"
+                                        value={rfidLabel}
+                                        onChange={(e) => setRfidLabel(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleRfidSubmit}>Register RFID</Button>
+                                {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
                             </div>
-                        </Col>
-                    </Row>
-                </Form>
+                            <div className="border rounded-1 p-2 mt-5">
+                                <h3>PIN Registration</h3>
+                                <Form.Group className="mb-2">
+                                    <Form.Label>PIN</Form.Label>
+                                    <Form.Control
+                                        type="password"
+                                        placeholder="Enter 4-digit PIN"
+                                        value={pin}
+                                        onChange={(e) => setPin(e.target.value)}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-2">
+                                    <Form.Label>PIN Label</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter PIN label"
+                                        value={pinLabel}
+                                        onChange={(e) => setPinLabel(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handlePinSubmit}>Add PIN</Button>
+                                {pinStatus && <div className="mt-3">{pinStatus}</div>}
+                            </div>
+                        </Form>
+                    </Col>
+                </Row>
             </Container>
+            
         </div>
     );
 };
