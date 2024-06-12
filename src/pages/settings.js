@@ -150,7 +150,7 @@ const Settings = () => {
     };
 
     return (
-        <div className="d-flex flex-column-reverse flex-md-column vh-100">
+        <div className="d-flex flex-column-reverse flex-md-column vh-100 dvh-100">
             <AppNavbar user={user} />
             <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
                 <h2>Settings</h2>

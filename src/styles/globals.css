@@ -169,3 +169,7 @@ body {
 .toggle-hidden {
     display: none;
 }
+
+.dvh-100 {
+    height: 100dvh !important;
+}
