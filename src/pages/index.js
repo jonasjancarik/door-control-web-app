@@ -10,26 +10,25 @@ const Home = () => {
     const [token, setToken] = useState('');
     const router = useRouter();
 
-    useEffect(() => {
+    const checkLocalStorage = () => {
         const storedToken = localStorage.getItem('token');
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if (storedToken && storedUser) {
             setToken(storedToken);
             setUser(storedUser);
+        } else {
+            setToken('');
+            setUser(null);
         }
-    }, [router.asPath]);
+    };
+
+    useEffect(() => {
+        checkLocalStorage();
+    }, []);
 
     useEffect(() => {
         const handleStorageChange = () => {
-            const storedToken = localStorage.getItem('token');
-            const storedUser = JSON.parse(localStorage.getItem('user'));
-            if (storedToken && storedUser) {
-                setToken(storedToken);
-                setUser(storedUser);
-            } else {
-                setToken('');
-                setUser(null);
-            }
+            checkLocalStorage();
         };
 
         window.addEventListener('storage', handleStorageChange);
@@ -39,6 +38,13 @@ const Home = () => {
         };
     }, []);
 
+    useEffect(() => {
+        router.events.on('routeChangeComplete', checkLocalStorage);
+        return () => {
+            router.events.off('routeChangeComplete', checkLocalStorage);
+        };
+    }, [router.events]);
+
     const handleLogin = (token, user) => {
         setToken(token);
         setUser(user);
@@ -47,7 +53,7 @@ const Home = () => {
     };
 
     return (
-        <div className="d-flex flex-column-reverse flex-md-column vh-100 dvh-100">
+        <div className="d-flex flex-column-reverse flex-md-column vh-100">
             <AppNavbar user={user} />
             <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
                 {!user ? (
