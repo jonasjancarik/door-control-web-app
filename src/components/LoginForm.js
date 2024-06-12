@@ -36,6 +36,7 @@ const LoginForm = ({ onLogin }) => {
     }, [loginCode, onLogin]);
 
     useEffect(() => {
+        console.log(process.env)
         const { login_code } = router.query;
         if (login_code) {
             setLoginCode(login_code);
@@ -48,7 +49,7 @@ const LoginForm = ({ onLogin }) => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/send-magic-link`, { email });
             if (response.status === 200) {
-                setEmailStatus('A login code has been sent to your email.');  // todo: for gmail, present a search link like https://mail.google.com/mail/u/0/#search/from%3A(SENDER_EMAIL)+in%3Aanywhere+newer_than%3A1h/FMfcgzQVwxCxvfkGZtQpSWXqSlNdncJH
+                setEmailStatus('A login code has been sent to your email.');
                 setEmailSent(true);
             } else {
                 setEmailStatus('Failed to send email.');
@@ -105,6 +106,7 @@ const LoginForm = ({ onLogin }) => {
                             </>
                         )}
                         {emailStatus && <div className="mt-3">{emailStatus}</div>}
+                        {emailSent && email.endsWith('@gmail.com') && process.env.NEXT_SENDER_EMAIL && <a href={`https://mail.google.com/mail/u/0/#search/from%3A(${process.env.NEXT_SENDER_EMAIL})+in%3Aanywhere+newer_than%3A1h/`}>Open Gmail</a>}
                     </Form>
                 </Col>
             </Row>
