@@ -152,12 +152,13 @@ const Settings = () => {
     return (
         <div className="d-flex flex-column-reverse flex-md-column vh-100 dvh-100">
             <AppNavbar user={user} />
-            <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
+            <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center overflow-auto">
                 <h2>Settings</h2>
                 <Form className="w-100">
-                    <Row>
-                        <Col>
-                            <h4 className="mt-5">User Registration</h4>
+                    <Row className='mt-5'>
+                        <Col className='mt-5'>
+                            <div className="border rounded-1 p-2 mt-5">
+                            <h4>User Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control
@@ -184,10 +185,11 @@ const Settings = () => {
                                     onChange={(e) => setIsGuest(e.target.checked)}
                                 />
                             </Form.Group>
-                            <Button onClick={handleUserSubmit}>Add User</Button>
+                            <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleUserSubmit}>Add User</Button>
                             {userStatus && <div className="mt-3">{userStatus}</div>}
-
-                            <h4 className="mt-5">RFID Registration</h4>
+                            </div>
+                            <div className="border rounded-1 p-2 mt-5">
+                            <h4>RFID Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>RFID UUID</Form.Label>
                                 <InputGroup>
@@ -198,7 +200,7 @@ const Settings = () => {
                                         onChange={(e) => setRfidUuid(e.target.value)}
                                         disabled={isLoading}
                                     />
-                                    <Button onClick={handleRfidRead} disabled={isLoading}>
+                                    <Button variant="outline-secondary" onClick={handleRfidRead} disabled={isLoading}>
                                         {isLoading ? <Spinner as="span" animation="border" size="sm" /> : 'Read RFID'}
                                     </Button>
                                 </InputGroup>
@@ -213,10 +215,11 @@ const Settings = () => {
                                     onChange={(e) => setRfidLabel(e.target.value)}
                                 />
                             </Form.Group>
-                            <Button onClick={handleRfidSubmit}>Submit RFID</Button>
+                            <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleRfidSubmit}>Register RFID</Button>
                             {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
-
-                            <h4 className='mt-5'>PIN Registration</h4>
+                            </div>
+                            <div className="border rounded-1 p-2 mt-5">
+                            <h4>PIN Registration</h4>
                             <Form.Group className="mb-2">
                                 <Form.Label>PIN</Form.Label>
                                 <Form.Control
@@ -226,6 +229,7 @@ const Settings = () => {
                                     onChange={(e) => setPin(e.target.value)}
                                 />
                             </Form.Group>
+
                             <Form.Group className="mb-2">
                                 <Form.Label>PIN Label</Form.Label>
                                 <Form.Control
@@ -235,8 +239,9 @@ const Settings = () => {
                                     onChange={(e) => setPinLabel(e.target.value)}
                                 />
                             </Form.Group>
-                            <Button onClick={handlePinSubmit}>Submit PIN</Button>
+                            <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handlePinSubmit}>Add PIN</Button>
                             {pinStatus && <div className="mt-3">{pinStatus}</div>}
+                            </div>
                         </Col>
                     </Row>
                 </Form>
