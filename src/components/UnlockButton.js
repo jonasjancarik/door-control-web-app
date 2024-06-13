@@ -9,7 +9,6 @@ const UnlockButton = ({ token }) => {
 
     const handleUnlock = async () => {
         setIsButtonDisabled(true);
-        controls.start({ strokeDashoffset: 364.424, transition: { duration: 7, ease: 'linear' } });
 
         function resetButton() {
             controls.start({ strokeDashoffset: 0, transition: { duration: 0.5, ease: 'linear' } });
@@ -17,17 +16,18 @@ const UnlockButton = ({ token }) => {
             // setStatus('Unlock Door');
         }
 
+        setStatus('Unlocked...');
+        controls.start({ strokeDashoffset: 364.424, transition: { duration: 10, ease: 'linear' } });  // todo: duration should be set using an env var - or wait for the server response, but then we need to make a request first to get the duration
+
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/unlock`, null, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (response.status === 200) {
-                setStatus('Unlocked...');
                 setTimeout(() => {
-                    controls.start({ strokeDashoffset: 0, transition: { duration: 0.5, ease: 'linear' } });
-                    setIsButtonDisabled(false);
+                    resetButton();
                     setStatus("Unlock Door");
-                }, 7000);
+                }, 10000);
             } else {  // edge case, errors should be caught by the catch block
                 setStatus('Failed to unlock door');
                 resetButton();
