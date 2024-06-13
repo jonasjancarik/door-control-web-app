@@ -43,16 +43,16 @@ const AppNavbar = ({ user }) => {
                         </div>
                         <div className="d-lg-none d-flex justify-content-around w-75 mx-auto">
                             <Nav.Link as={Link} href="/">
-                                {/* <FaHome size={24} color='fffdf4' /> */}
-                                <MdHome size={24} color='fffdf4' />
+                                {/* <FaHome size={36} color='fffdf4' /> */}
+                                <MdHome size={36} color='fffdf4' />
                             </Nav.Link>
                             <Nav.Link as={Link} href="/settings">
-                                {/* <FaCog size={24} color="fffdf4" /> */}
-                                <MdSettings size={24} color="fffdf4" />
+                                {/* <FaCog size={36} color="fffdf4" /> */}
+                                <MdSettings size={36} color="fffdf4" />
                             </Nav.Link>
                             <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                                {/* <FaSignOutAlt size={24} color="fffdf4" /> */}
-                                <MdLogout size={24} color="fffdf4" />
+                                {/* <FaSignOutAlt size={36} color="fffdf4" /> */}
+                                <MdLogout size={36} color="fffdf4" />
                             </Nav.Link>
                         </div>
                     </>
