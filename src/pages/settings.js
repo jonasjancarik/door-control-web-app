@@ -55,7 +55,11 @@ const Settings = () => {
                 setUserStatus('Failed to add user.');
             }
         } catch (error) {
-            setUserStatus('Failed to connect to the API.');
+            if (error.response && error.response.status === 409) {
+                setUserStatus('User with this email already exists.');
+            } else {
+                setUserStatus('Failed to connect to the API.');
+            }
         }
     };
 
