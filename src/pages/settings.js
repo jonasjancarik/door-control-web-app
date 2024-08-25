@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Form, Button, Row, Col, InputGroup, Spinner, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, InputGroup, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import axios from 'axios';
 import AppNavbar from '../components/Navbar';
 
@@ -18,6 +18,7 @@ const Settings = () => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -42,6 +43,7 @@ const Settings = () => {
             return;
         }
 
+        setIsSubmitting(true);
         const newUser = { email: userEmail, name: userName || userEmail, guest: isGuest };
 
         try {
@@ -50,7 +52,10 @@ const Settings = () => {
             });
 
             if (response.status === 200) {
-                setUserStatus('User added.');
+                setUserStatus('User added successfully.');
+                setUserEmail('');
+                setUserName('');
+                setIsGuest(false);
             } else {
                 setUserStatus('Failed to add user.');
             }
@@ -60,6 +65,8 @@ const Settings = () => {
             } else {
                 setUserStatus('Failed to connect to the API.');
             }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -79,6 +86,7 @@ const Settings = () => {
             return;
         }
 
+        setIsSubmitting(true);
         const pinData = { pin, label: pinLabel || new Date().toISOString() };
 
         try {
@@ -88,11 +96,15 @@ const Settings = () => {
 
             if (response.status === 200) {
                 setPinStatus('PIN successfully registered.');
+                setPin('');
+                setPinLabel('');
             } else {
                 setPinStatus('Failed to register PIN.');
             }
         } catch (error) {
             setPinStatus('Failed to connect to the API.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -190,8 +202,15 @@ const Settings = () => {
                                         onChange={(e) => setIsGuest(e.target.checked)}
                                     />
                                 </Form.Group>
-                                <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleUserSubmit}>Add User</Button>
-                                {userStatus && <div className="mt-3">{userStatus}</div>}
+                                <Button 
+                                    className="mt-3 ms-auto d-block" 
+                                    variant="outline-secondary" 
+                                    onClick={handleUserSubmit}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? <Spinner as="span" animation="border" size="sm" /> : 'Add User'}
+                                </Button>
+                                {userStatus && <Alert variant={userStatus.includes('successfully') ? 'success' : 'danger'} className="mt-3">{userStatus}</Alert>}
                             </div>
                             <div className="border rounded-1 p-2 mt-5">
                                 <h3>RFID Registration</h3>
@@ -228,13 +247,16 @@ const Settings = () => {
                                 <Form.Group className="mb-2">
                                     <Form.Label>PIN</Form.Label>
                                     <Form.Control
-                                        type="password"
+                                        type="text"
                                         placeholder="Enter 4-digit PIN"
                                         value={pin}
                                         onChange={(e) => setPin(e.target.value)}
+                                        aria-describedby="pin-help"
                                     />
+                                    <Form.Text id="pin-help" muted>
+                                        PIN must be a 4-digit number and not easily guessable.
+                                    </Form.Text>
                                 </Form.Group>
-
                                 <Form.Group className="mb-2">
                                     <Form.Label>PIN Label</Form.Label>
                                     <Form.Control
@@ -244,8 +266,15 @@ const Settings = () => {
                                         onChange={(e) => setPinLabel(e.target.value)}
                                     />
                                 </Form.Group>
-                                <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handlePinSubmit}>Add PIN</Button>
-                                {pinStatus && <div className="mt-3">{pinStatus}</div>}
+                                <Button 
+                                    className="mt-3 ms-auto d-block" 
+                                    variant="outline-secondary" 
+                                    onClick={handlePinSubmit}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? <Spinner as="span" animation="border" size="sm" /> : 'Add PIN'}
+                                </Button>
+                                {pinStatus && <Alert variant={pinStatus.includes('successfully') ? 'success' : 'danger'} className="mt-3">{pinStatus}</Alert>}
                             </div>
                         </Form>
                     </Col>
