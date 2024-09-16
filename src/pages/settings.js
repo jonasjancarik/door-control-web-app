@@ -146,8 +146,11 @@ const Settings = () => {
         const rfidData = { 
             uuid: rfidUuid, 
             label: rfidLabel || new Date().toISOString(),
-            user_email: user.admin ? rfidUserEmail : undefined
         };
+
+        if (user.admin && rfidUserEmail) {
+            rfidData.user_email = rfidUserEmail;
+        }
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfid/create`, rfidData, {
