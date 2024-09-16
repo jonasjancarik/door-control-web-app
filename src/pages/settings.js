@@ -11,6 +11,7 @@ const Settings = () => {
     const [pinLabel, setPinLabel] = useState('');
     const [rfidUuid, setRfidUuid] = useState('');
     const [rfidLabel, setRfidLabel] = useState('');
+    const [rfidUserEmail, setRfidUserEmail] = useState('');
     const [userStatus, setUserStatus] = useState('');
     const [pinStatus, setPinStatus] = useState('');
     const [rfidReadStatus, setRfidReadStatus] = useState('');
@@ -142,7 +143,11 @@ const Settings = () => {
             return;
         }
 
-        const rfidData = { uuid: rfidUuid, label: rfidLabel || new Date().toISOString() };
+        const rfidData = { 
+            uuid: rfidUuid, 
+            label: rfidLabel || new Date().toISOString(),
+            user_email: user.admin ? rfidUserEmail : undefined
+        };
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfid/create`, rfidData, {
@@ -151,6 +156,9 @@ const Settings = () => {
 
             if (response.status === 200) {
                 setRfidStatus('RFID successfully registered.');
+                setRfidUuid('');
+                setRfidLabel('');
+                setRfidUserEmail('');
             } else {
                 setRfidStatus('Failed to register RFID.');
             }
@@ -239,8 +247,19 @@ const Settings = () => {
                                         onChange={(e) => setRfidLabel(e.target.value)}
                                     />
                                 </Form.Group>
+                                {user && user.admin && (
+                                    <Form.Group className="mb-2">
+                                        <Form.Label>User Email (optional)</Form.Label>
+                                        <Form.Control
+                                            type="email"
+                                            placeholder="Enter user email"
+                                            value={rfidUserEmail}
+                                            onChange={(e) => setRfidUserEmail(e.target.value)}
+                                        />
+                                    </Form.Group>
+                                )}
                                 <Button className="mt-3 ms-auto d-block" variant="outline-secondary" onClick={handleRfidSubmit}>Register RFID</Button>
-                                {rfidStatus && <Alert variant='danger' className="mt-3 p-2">{rfidStatus}</Alert>}
+                                {rfidStatus && <Alert variant={rfidStatus.includes('successfully') ? 'success' : 'danger'} className="mt-3 p-2">{rfidStatus}</Alert>}
                             </div>
                             <div className="border rounded-1 p-2 mt-5">
                                 <h3>PIN Registration</h3>
