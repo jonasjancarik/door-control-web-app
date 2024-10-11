@@ -1,20 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    admin: boolean;
-    guest: boolean;
-    apartment_number: string;
-}
+import { User } from '@/types/types';
 
 interface AuthContextType {
     user: User | null;
     token: string | null;
     login: (token: string, user: User) => void;
     logout: () => void;
-    loading: boolean; // Add this line
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

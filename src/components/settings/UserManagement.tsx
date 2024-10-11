@@ -10,7 +10,7 @@ const UserManagement = ({ user, token }) => {
     const [showPinModal, setShowPinModal] = useState(false);
     const [showRfidModal, setShowRfidModal] = useState(false);
     const [showUserModal, setShowUserModal] = useState(false);
-    const [newUser, setNewUser] = useState({ name: '', email: '', apartment_number: '', guest: false, admin: false });
+    const [newUser, setNewUser] = useState({ name: '', email: '', apartment_number: '', role: 'apartment_admin' });
     const [error, setError] = useState('');
     const [modalError, setModalError] = useState('');
     const [apartments, setApartments] = useState([]);
@@ -60,7 +60,7 @@ const UserManagement = ({ user, token }) => {
 
     const handleAddUser = () => {
         setSelectedUser(null);
-        setNewUser({ name: '', email: '', apartment_number: '', guest: false, admin: false });
+        setNewUser({ name: '', email: '', apartment_number: '', role: 'apartment_admin' });
         setShowUserModal(true);
     };
 
@@ -173,24 +173,18 @@ const UserManagement = ({ user, token }) => {
                                 ))}
                             </Form.Select>
                         </Form.Group>
-                        <Form.Group controlId="guest">
-                            <Form.Check 
-                                type="checkbox" 
-                                label="Guest" 
-                                checked={newUser.guest} 
-                                onChange={(e) => setNewUser({ ...newUser, guest: e.target.checked })} 
-                            />
+                        <Form.Group controlId="role">
+                            <Form.Label>Role</Form.Label>
+                            <Form.Select
+                                value={newUser.role}
+                                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                                required
+                            >
+                                <option value="apartment_admin">Apartment Admin</option>
+                                <option value="guest">Guest</option>
+                                {user.role === 'admin' && <option value="admin">Admin</option>}
+                            </Form.Select>
                         </Form.Group>
-                        {user.admin && (
-                            <Form.Group controlId="admin">
-                                <Form.Check 
-                                    type="checkbox" 
-                                    label="Admin" 
-                                    checked={newUser.admin} 
-                                    onChange={(e) => setNewUser({ ...newUser, admin: e.target.checked })} 
-                                />
-                            </Form.Group>
-                        )}
                         <Button variant="primary" type="submit">Submit</Button>
                     </Form>
                 </Modal.Body>

@@ -33,12 +33,12 @@ const Settings = () => {
                             <Tab eventKey="profile" title="Profile">
                                 <UserProfile user={user} token={token} />
                             </Tab>
-                            {!user.guest && (
+                            {user.role !== 'guest' && (
                                 <Tab eventKey="users" title="User Management">
                                     <UserManagement user={user} token={token} />
                                 </Tab>
                             )}
-                            {user.admin && (
+                            {user.role === 'admin' && (
                                 <Tab eventKey="apartments" title="Apartment Management">
                                     <ApartmentManagement user={user} token={token} />
                                 </Tab>

@@ -36,7 +36,7 @@ const AppNavbar = ({ user }) => {
                                 <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                                 <Nav.Link className="ms-auto" as={Link} href="/settings">Settings</Nav.Link>
                                 <Nav.Link className="ms-auto" onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                                    {user.name} (Logout)
+                                    {user.name} ({user.role}) (Logout)
                                 </Nav.Link>
                             </Nav>
                         </Navbar.Collapse>

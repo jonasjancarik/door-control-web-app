@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { User } from '@/types/types';
 
 interface UserProfileProps {
-    user: {
-        id: number;
-        name: string;
-        email: string;
-        apartment_number: string;
-    };
+    user: User;
     token: string;
 }
 
@@ -65,6 +61,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, token }) => {
                     value={apartmentNumber}
                     onChange={(e) => setApartmentNumber(e.target.value)}
                     required
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Role</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={user.role}
+                    disabled
                 />
             </Form.Group>
             <Button variant="primary" type="submit">

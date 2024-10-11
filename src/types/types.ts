@@ -2,8 +2,7 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    admin: boolean;
-    guest: boolean;
+    role: 'admin' | 'apartment_admin' | 'guest';
     apartment_number: string;
 }
 
