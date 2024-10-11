@@ -23,7 +23,7 @@ const UnlockButton = ({ token }) => {
             });
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/unlock`, null, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/door/unlock`, null, {
                 headers: { Authorization: `Bearer ${token}` },
             });
         } catch (error) {

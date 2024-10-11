@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Form, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import axios from 'axios';
+import { AxiosError } from 'axios';
 
 const LoginForm = ({ onLogin }) => {
     const [email, setEmail] = useState('');
@@ -14,17 +15,17 @@ const LoginForm = ({ onLogin }) => {
 
     const handleLogin = useCallback(async (code) => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/exchange-code`, { login_code: code || loginCode });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/exchange-code`, { login_code: code || loginCode });
             if (response.status === 200) {
                 onLogin(response.data.access_token, response.data.user);
             } else {
                 setEmailStatus('Failed to login.');
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 400) {
                     setEmailStatus('Invalid login code.');
-                } else if (error.response.status === 401) {
+                } else if (error.response?.status === 401) {
                     setEmailStatus('Invalid or expired login code.');
                 } else {
                     setEmailStatus('Failed to connect to the API.');
@@ -47,7 +48,7 @@ const LoginForm = ({ onLogin }) => {
     const handleSendLink = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/send-magic-link`, { email });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/send-magic-link`, { email });
             if (response.status === 200) {
                 setEmailStatus('A login code has been sent to your email.');
                 setEmailSent(true);

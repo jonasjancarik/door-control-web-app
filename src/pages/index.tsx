@@ -4,11 +4,17 @@ import LoginForm from '../components/LoginForm';
 import UnlockButton from '../components/UnlockButton';
 import { Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import Login from '../components/Login';
+import Dashboard from '../components/Dashboard';
+import UserManagement from '../components/UserManagement';
 
 const Home = () => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState('');
     const router = useRouter();
+    const { user: authUser } = useAuth();
 
     const checkLocalStorage = () => {
         const storedToken = localStorage.getItem('token');
