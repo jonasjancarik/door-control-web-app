@@ -15,7 +15,10 @@ const LoginForm = ({ onLogin }) => {
 
     const handleLogin = useCallback(async (code) => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/exchange-code`, { login_code: code || loginCode });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/exchange-code`, { 
+                login_code: code || loginCode,
+                email: email
+            });
             if (response.status === 200) {
                 onLogin(response.data.access_token, response.data.user);
             } else {
@@ -34,7 +37,7 @@ const LoginForm = ({ onLogin }) => {
                 setEmailStatus('Failed to connect to the API.');
             }
         }
-    }, [loginCode, onLogin]);
+    }, [loginCode, onLogin, email]);
 
     useEffect(() => {
         console.log(process.env)
