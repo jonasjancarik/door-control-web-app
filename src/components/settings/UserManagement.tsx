@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import PinManagement from './PinManagement';
 import RfidManagement from './RfidManagement';
+import GuestScheduleManagement from './GuestScheduleManagement';
+import { User, Apartment } from '@/types/types';
 
-const UserManagement = ({ user, token }) => {
+interface UserManagementProps {
+    user: User;
+    token: string;
+}
+
+const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
     const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showPinModal, setShowPinModal] = useState(false);
     const [showRfidModal, setShowRfidModal] = useState(false);
     const [showUserModal, setShowUserModal] = useState(false);
@@ -14,8 +21,9 @@ const UserManagement = ({ user, token }) => {
     const [error, setError] = useState('');
     const [modalError, setModalError] = useState('');
     const [apartments, setApartments] = useState([]);
+    const [showGuestScheduleModal, setShowGuestScheduleModal] = useState(false);
 
-    const fetchApartments = async () => {
+    const fetchApartments = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments/list`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -25,35 +33,40 @@ const UserManagement = ({ user, token }) => {
             console.error('Failed to fetch apartments:', error);
             setError('Failed to fetch apartments. Please try again.');
         }
-    };
+    }, [token]); // Add any other dependencies if needed
 
-    useEffect(() => {
-        fetchUsers();
-        fetchApartments();
-    }, []);
-
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/list`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(user.admin ? response.data : response.data.filter(u => u.apartment_number === user.apartment_number));
+            setUsers(user.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment_number === user.apartment_number));
         } catch (error) {
             console.error('Failed to fetch users:', error);
-            if (error.response && error.response.data && error.response.data.detail) {
-                setError(error.response.data.detail);
+            if (error instanceof Error && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    setError(axiosError.response.data.detail);
+                } else {
+                    setError('Failed to fetch users. Please try again.');
+                }
             } else {
                 setError('Failed to fetch users. Please try again.');
             }
         }
-    };
+    }, [token, user.role, user.apartment_number]);
 
-    const handlePinManagement = (user) => {
+    useEffect(() => {
+        fetchApartments();
+        fetchUsers();
+    }, [fetchApartments, fetchUsers]);
+
+    const handlePinManagement = (user: User) => {
         setSelectedUser(user);
         setShowPinModal(true);
     };
 
-    const handleRfidManagement = (user) => {
+    const handleRfidManagement = (user: User) => {
         setSelectedUser(user);
         setShowRfidModal(true);
     };
@@ -64,13 +77,13 @@ const UserManagement = ({ user, token }) => {
         setShowUserModal(true);
     };
 
-    const handleEditUser = (user) => {
+    const handleEditUser = (user: User) => {
         setSelectedUser(user);
         setNewUser({ ...user });
         setShowUserModal(true);
     };
 
-    const handleUserSubmit = async (e) => {
+    const handleUserSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setModalError('');
@@ -88,12 +101,20 @@ const UserManagement = ({ user, token }) => {
             fetchUsers();
         } catch (error) {
             console.error('Failed to save user:', error);
-            if (error.response && error.response.data && error.response.data.detail) {
-                setModalError(error.response.data.detail);
-            } else {
-                setModalError('Failed to save user. Please try again.');
+            if (error instanceof Error && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    setModalError(axiosError.response.data.detail);
+                } else {
+                    setModalError('Failed to save user. Please try again.');
+                }
             }
         }
+    };
+
+    const handleGuestScheduleManagement = (user: User) => {
+        setSelectedUser(user);
+        setShowGuestScheduleModal(true);
     };
 
     return (
@@ -111,14 +132,17 @@ const UserManagement = ({ user, token }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map((u) => (
+                    {users.map((u: User) => (
                         <tr key={u.id}>
                             <td>{u.name}</td>
                             <td>{u.email}</td>
                             <td>{u.apartment_number}</td>
                             <td>
-                                <Button variant="primary" onClick={() => handlePinManagement(u)}>Manage PINs</Button>
-                                <Button variant="secondary" onClick={() => handleRfidManagement(u)}>Manage RFID</Button>
+                                <Button variant="primary" onClick={() => handlePinManagement(u)} className="me-2">Manage PINs</Button>
+                                <Button variant="secondary" onClick={() => handleRfidManagement(u)} className="me-2">Manage RFID</Button>
+                                {u.role === 'guest' && (
+                                    <Button variant="info" onClick={() => handleGuestScheduleManagement(u)}>Manage Schedule</Button>
+                                )}
                             </td>
                         </tr>
                     ))}
@@ -166,7 +190,7 @@ const UserManagement = ({ user, token }) => {
                                 required
                             >
                                 <option value="">Select an apartment</option>
-                                {apartments.map((apartment) => (
+                                {apartments.map((apartment: Apartment) => (
                                     <option key={apartment.id} value={apartment.number}>
                                         {apartment.number}
                                     </option>
@@ -187,6 +211,19 @@ const UserManagement = ({ user, token }) => {
                         </Form.Group>
                         <Button variant="primary" type="submit">Submit</Button>
                     </Form>
+                </Modal.Body>
+            </Modal>
+
+            <Modal show={showGuestScheduleModal} onHide={() => setShowGuestScheduleModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Manage Guest Schedule for {selectedUser?.name}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedUser ? (
+                        <GuestScheduleManagement user={selectedUser} token={token} />
+                    ) : (
+                        <p>No user selected</p>
+                    )}
                 </Modal.Body>
             </Modal>
         </div>
