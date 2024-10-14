@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Form, Alert, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import { User } from '@/types/types';
@@ -16,46 +16,34 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    const fetchSchedules = useCallback(async () => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/guest/schedule/list?user_id=${user.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setRecurringSchedules(response.data.recurring_schedules);
+            setOneTimeAccess(response.data.one_time_access);
+        } catch (error) {
+            console.error('Failed to fetch guest schedules:', error);
+            setError('Failed to fetch guest schedules. Please try again.');
+        }
+    }, [user, token]);
+
     useEffect(() => {
-        fetchRecurringSchedules();
-        fetchOneTimeAccess();
-    }, [user]);
-
-    const fetchRecurringSchedules = async () => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/guest-schedules/recurring/${user.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setRecurringSchedules(response.data);
-        } catch (error) {
-            console.error('Failed to fetch recurring schedules:', error);
-            setError('Failed to fetch recurring schedules. Please try again.');
-        }
-    };
-
-    const fetchOneTimeAccess = async () => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/guest-schedules/one-time/${user.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setOneTimeAccess(response.data);
-        } catch (error) {
-            console.error('Failed to fetch one-time access:', error);
-            setError('Failed to fetch one-time access. Please try again.');
-        }
-    };
+        fetchSchedules();
+    }, [user, fetchSchedules]);
 
     const handleAddRecurringSchedule = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guest-schedules/recurring`, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guest/schedule/recurring/create`, {
                 user_id: user.id,
                 ...newRecurringSchedule
             }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('Recurring schedule added successfully');
-            fetchRecurringSchedules();
+            fetchSchedules();
             setNewRecurringSchedule({ day_of_week: 0, start_time: '', end_time: '' });
         } catch (error) {
             console.error('Failed to add recurring schedule:', error);
@@ -66,14 +54,14 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
     const handleAddOneTimeAccess = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guest-schedules/one-time`, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guest/access/one-time/create`, {
                 user_id: user.id,
                 ...newOneTimeAccess
             }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('One-time access added successfully');
-            fetchOneTimeAccess();
+            fetchSchedules();
             setNewOneTimeAccess({ access_date: '', start_time: '', end_time: '' });
         } catch (error) {
             console.error('Failed to add one-time access:', error);
@@ -83,11 +71,11 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
 
     const handleRemoveRecurringSchedule = async (scheduleId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guest-schedules/recurring/${scheduleId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guest/schedule/recurring/delete/${scheduleId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('Recurring schedule removed successfully');
-            fetchRecurringSchedules();
+            fetchSchedules();
         } catch (error) {
             console.error('Failed to remove recurring schedule:', error);
             setError('Failed to remove recurring schedule. Please try again.');
@@ -96,11 +84,11 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
 
     const handleRemoveOneTimeAccess = async (accessId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guest-schedules/one-time/${accessId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guest/access/one-time/delete/${accessId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('One-time access removed successfully');
-            fetchOneTimeAccess();
+            fetchSchedules();
         } catch (error) {
             console.error('Failed to remove one-time access:', error);
             setError('Failed to remove one-time access. Please try again.');
