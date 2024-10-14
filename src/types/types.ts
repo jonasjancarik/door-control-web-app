@@ -8,7 +8,7 @@ export interface User {
     one_time_access?: OneTimeGuestAccess[];
 }
 
-export interface Pin {
+export interface PIN {
     id: number;
     label: string;
     created_at: string;

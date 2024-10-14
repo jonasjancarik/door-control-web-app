@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { User, PIN } from '@/types/types';
 
-const PinManagement = ({ user, token }) => {
+interface PinManagementProps {
+    user: User;
+    token: string;
+}
+
+const PinManagement: React.FC<PinManagementProps> = ({ user, token }) => {
     const [pins, setPins] = useState([]);
     const [newPin, setNewPin] = useState('');
     const [newPinLabel, setNewPinLabel] = useState('');
@@ -25,7 +31,7 @@ const PinManagement = ({ user, token }) => {
         }
     };
 
-    const handleAddPin = async (e) => {
+    const handleAddPin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
@@ -44,7 +50,7 @@ const PinManagement = ({ user, token }) => {
         }
     };
 
-    const handleDeletePin = async (pinId) => {
+    const handleDeletePin = async (pinId: PIN['id']) => {
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/pins/${pinId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -93,7 +99,7 @@ const PinManagement = ({ user, token }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {pins.map((pin) => (
+                    {pins.map((pin: PIN) => (
                         <tr key={pin.id}>
                             <td>****</td>
                             <td>{pin.label}</td>
