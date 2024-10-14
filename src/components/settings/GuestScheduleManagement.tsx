@@ -18,7 +18,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
 
     const fetchSchedules = useCallback(async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/guest/schedule/list?user_id=${user.id}`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/guests/${user.id}/schedules`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setRecurringSchedules(response.data.recurring_schedules);
@@ -36,8 +36,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
     const handleAddRecurringSchedule = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guest/schedule/recurring/create`, {
-                user_id: user.id,
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guests/${user.id}/recurring-schedules`, {
                 ...newRecurringSchedule
             }, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -54,8 +53,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
     const handleAddOneTimeAccess = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guest/access/one-time/create`, {
-                user_id: user.id,
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guests/${user.id}/one-time-accesses`, {
                 ...newOneTimeAccess
             }, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -71,7 +69,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
 
     const handleRemoveRecurringSchedule = async (scheduleId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guest/schedule/recurring/delete/${scheduleId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guests/recurring-schedules/${scheduleId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('Recurring schedule removed successfully');
@@ -84,7 +82,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
 
     const handleRemoveOneTimeAccess = async (accessId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guest/access/one-time/delete/${accessId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guests/one-time-accesses/${accessId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('One-time access removed successfully');

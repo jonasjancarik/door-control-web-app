@@ -15,9 +15,8 @@ const PinManagement = ({ user, token }) => {
 
     const fetchPins = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/pin/list/user`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}/pins`, {
                 headers: { Authorization: `Bearer ${token}` },
-                params: { user_id: user.id },
             });
             setPins(response.data);
         } catch (error) {
@@ -27,10 +26,9 @@ const PinManagement = ({ user, token }) => {
     };
 
     const handleAddPin = async (e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pin/create`, {
-                user_id: user.id,
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
                 pin: newPin,
                 label: newPinLabel,
             }, {
@@ -48,7 +46,7 @@ const PinManagement = ({ user, token }) => {
 
     const handleDeletePin = async (pinId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/pin/delete/${pinId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/pins/${pinId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('PIN deleted successfully');

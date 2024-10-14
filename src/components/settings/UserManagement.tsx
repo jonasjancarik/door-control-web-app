@@ -25,7 +25,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
 
     const fetchApartments = useCallback(async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments/list`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setApartments(response.data);
@@ -33,20 +33,20 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
             console.error('Failed to fetch apartments:', error);
             setError('Failed to fetch apartments. Please try again.');
         }
-    }, [token]); // Add any other dependencies if needed
+    }, [token]);
 
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/list`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUsers(user.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment_number === user.apartment_number));
         } catch (error) {
             console.error('Failed to fetch users:', error);
             if (error instanceof Error && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    setError(axiosError.response.data.detail);
+                const axiosError = error as { response?: { data?: { error?: { detail?: string } } } };
+                if (axiosError.response?.data?.error?.detail) {
+                    setError(axiosError.response.data.error.detail);
                 } else {
                     setError('Failed to fetch users. Please try again.');
                 }
@@ -89,11 +89,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
         setModalError('');
         try {
             if (selectedUser) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/users/update/${selectedUser.id}`, newUser, {
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/users/${selectedUser.id}`, newUser, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users/create`, newUser, {
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users`, newUser, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
             }
@@ -102,9 +102,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
         } catch (error) {
             console.error('Failed to save user:', error);
             if (error instanceof Error && 'response' in error) {
-                const axiosError = error as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    setModalError(axiosError.response.data.detail);
+                const axiosError = error as { response?: { data?: { error?: { detail?: string } } } };
+                if (axiosError.response?.data?.error?.detail) {
+                    setModalError(axiosError.response.data.error.detail);
                 } else {
                     setModalError('Failed to save user. Please try again.');
                 }

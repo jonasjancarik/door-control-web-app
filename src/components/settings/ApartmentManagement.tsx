@@ -16,7 +16,7 @@ const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, tok
 
     const fetchApartments = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments/list`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setApartments(response.data);
@@ -45,12 +45,12 @@ const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, tok
 
         try {
             if (selectedApartment) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/apartments/update/${selectedApartment.id}`, newApartment, {
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/apartments/${selectedApartment.id}`, newApartment, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setSuccess('Apartment updated successfully');
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/apartments/create`, newApartment, {
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/apartments`, newApartment, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setSuccess('Apartment added successfully');
@@ -65,7 +65,7 @@ const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, tok
 
     const handleDeleteApartment = async (apartmentId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/apartments/delete/${apartmentId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/apartments/${apartmentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('Apartment deleted successfully');

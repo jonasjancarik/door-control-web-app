@@ -16,9 +16,8 @@ const RfidManagement = ({ user, token }) => {
 
     const fetchRfidTags = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rfid/list/user`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}/rfids`, {
                 headers: { Authorization: `Bearer ${token}` },
-                params: { user_id: user.id },
             });
             setRfidTags(response.data);
         } catch (error) {
@@ -28,10 +27,9 @@ const RfidManagement = ({ user, token }) => {
     };
 
     const handleAddRfid = async (e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfid/create`, {
-                user_id: user.id,
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfids`, {
                 uuid: newRfidUuid,
                 label: newRfidLabel,
             }, {
@@ -49,7 +47,7 @@ const RfidManagement = ({ user, token }) => {
 
     const handleDeleteRfid = async (rfidId) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/rfid/delete/${rfidId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/rfids/${user.id}/${rfidId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('RFID tag deleted successfully');
@@ -65,7 +63,7 @@ const RfidManagement = ({ user, token }) => {
         setError('');
         setSuccess('');
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rfid/read`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rfids/read`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { timeout: 30 },
             });

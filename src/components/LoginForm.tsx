@@ -15,11 +15,11 @@ const LoginForm = ({ onLogin }) => {
 
     const handleLogin = useCallback(async (code) => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/exchange-code`, { 
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/tokens`, { 
                 login_code: code || loginCode,
                 email: email
             });
-            if (response.status === 200) {
+            if (response.status === 201) {
                 onLogin(response.data.access_token, response.data.user);
             } else {
                 setEmailStatus('Failed to login.');
@@ -51,8 +51,8 @@ const LoginForm = ({ onLogin }) => {
     const handleSendLink = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/send-magic-link`, { email });
-            if (response.status === 200) {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/magic-links`, { email });
+            if (response.status === 202) {
                 setEmailStatus('A login code has been sent to your email.');
                 setEmailSent(true);
             } else {
@@ -63,10 +63,11 @@ const LoginForm = ({ onLogin }) => {
                 if (error.response.status === 422) {
                     setEmailStatus('Invalid email address.');
                 } else {
-                    setEmailStatus('An error ocurred: ' + error.response.data.message);
+                    setEmailStatus('An error occurred: ' + error.response.data.error.detail);
                 }
+            } else {
+                setEmailStatus('Failed to connect to the API.');
             }
-            setEmailStatus('Failed to connect to the API.');
         } finally {
             setLoading(false);
         }

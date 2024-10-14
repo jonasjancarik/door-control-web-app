@@ -23,24 +23,22 @@ const UnlockButton = ({ token }) => {
             });
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/door/unlock`, null, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/doors/unlock`, null, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            setStatus('Door unlocked successfully');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status) {
-                    if (error.response.status === 401) {
-                        setStatus('You are not authorized to unlock the door. Try logging in again.');
-                    } else {
-                        console.log(error.response);
-                        setStatus(error.response.data.detail || 'Failed to connect to the lock');
-                    }
+            if (axios.isAxiosError(error) && error.response) {
+                const { status, data } = error.response;
+                if (status === 401) {
+                    setStatus('You are not authorized to unlock the door. Try logging in again.');
                 } else {
-                    console.log(error.response);
-                    setStatus(error.response.data.detail || 'Failed to connect to the lock');
+                    console.error('Error response:', error.response);
+                    setStatus(data.error?.detail || 'Failed to unlock the door');
                 }
             } else {
-                setStatus('Failed to connect to the lock');
+                console.error('Error:', error);
+                setStatus('Failed to connect to the server');
             }
             resetButton();
         }
