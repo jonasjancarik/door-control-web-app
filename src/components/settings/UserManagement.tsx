@@ -154,7 +154,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
                     <Modal.Title>Manage PINs for {selectedUser?.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <PinManagement user={selectedUser} token={token} />
+                    {selectedUser ? (
+                        <PinManagement user={selectedUser} token={token} />
+                    ) : (
+                        <p>No user selected</p>
+                    )}
                 </Modal.Body>
             </Modal>
 
@@ -163,7 +167,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
                     <Modal.Title>Manage RFID for {selectedUser?.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <RfidManagement user={selectedUser} token={token} />
+                    {selectedUser ? (
+                        <RfidManagement user={selectedUser} token={token} />
+                    ) : (
+                        <p>No user selected</p>
+                    )}
                 </Modal.Body>
             </Modal>
 
