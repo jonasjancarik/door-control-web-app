@@ -4,8 +4,8 @@ export interface User {
     email: string;
     role: 'admin' | 'apartment_admin' | 'guest';
     apartment_number: string;
-    recurring_schedules?: RecurringGuestSchedule[];
-    one_time_access?: OneTimeGuestAccess[];
+    recurring_schedules?: RecurringSchedule[];
+    one_time_access?: OneTimeAccess[];
 }
 
 export interface PIN {
@@ -24,7 +24,7 @@ export interface RFID {
     created_at: string;
 }
 
-export interface RecurringGuestSchedule {
+export interface RecurringSchedule {
     id: number;
     user_id: number;
     day_of_week: number;
@@ -32,7 +32,7 @@ export interface RecurringGuestSchedule {
     end_time: string;
 }
 
-export interface OneTimeGuestAccess {
+export interface OneTimeAccess {
     id: number;
     user_id: number;
     access_date: string;

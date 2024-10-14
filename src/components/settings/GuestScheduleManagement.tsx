@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Form, Alert, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
-import { User } from '@/types/types';
+import { User, RecurringSchedule, OneTimeAccess } from '@/types/types';
 
 interface GuestScheduleManagementProps {
     user: User;
@@ -33,7 +33,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
         fetchSchedules();
     }, [user, fetchSchedules]);
 
-    const handleAddRecurringSchedule = async (e) => {
+    const handleAddRecurringSchedule = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guests/${user.id}/recurring-schedules`, {
@@ -50,7 +50,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
         }
     };
 
-    const handleAddOneTimeAccess = async (e) => {
+    const handleAddOneTimeAccess = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/guests/${user.id}/one-time-accesses`, {
@@ -67,7 +67,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
         }
     };
 
-    const handleRemoveRecurringSchedule = async (scheduleId) => {
+    const handleRemoveRecurringSchedule = async (scheduleId: RecurringSchedule['id']) => {
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guests/recurring-schedules/${scheduleId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -80,7 +80,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
         }
     };
 
-    const handleRemoveOneTimeAccess = async (accessId) => {
+    const handleRemoveOneTimeAccess = async (accessId: OneTimeAccess['id']) => {
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/guests/one-time-accesses/${accessId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -142,7 +142,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
                             </tr>
                         </thead>
                         <tbody>
-                            {recurringSchedules.map((schedule) => (
+                            {recurringSchedules.map((schedule: RecurringSchedule) => (
                                 <tr key={schedule.id}>
                                     <td>{daysOfWeek[schedule.day_of_week]}</td>
                                     <td>{schedule.start_time}</td>
@@ -193,7 +193,7 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
                             </tr>
                         </thead>
                         <tbody>
-                            {oneTimeAccess.map((access) => (
+                            {oneTimeAccess.map((access: OneTimeAccess) => (
                                 <tr key={access.id}>
                                     <td>{access.access_date}</td>
                                     <td>{access.start_time}</td>
