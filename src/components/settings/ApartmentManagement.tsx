@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { User, Apartment } from '@/types/types';
 
-const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, token }) => {
+interface ApartmentManagementProps {
+    user: User;
+    token: string;
+}
+
+const ApartmentManagement: React.FC<ApartmentManagementProps> = ({ user, token }) => {
     const [apartments, setApartments] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectedApartment, setSelectedApartment] = useState(null);
+    const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
     const [newApartment, setNewApartment] = useState({ number: '', description: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -32,13 +38,13 @@ const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, tok
         setShowModal(true);
     };
 
-    const handleEditApartment = (apartment) => {
+    const handleEditApartment = (apartment: Apartment) => {
         setSelectedApartment(apartment);
         setNewApartment({ number: apartment.number, description: apartment.description });
         setShowModal(true);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setSuccess('');
@@ -63,7 +69,7 @@ const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, tok
         }
     };
 
-    const handleDeleteApartment = async (apartmentId) => {
+    const handleDeleteApartment = async (apartmentId: Apartment['id']) => {
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/apartments/${apartmentId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -91,7 +97,7 @@ const ApartmentManagement: React.FC<{ user: any; token: string }> = ({ user, tok
                     </tr>
                 </thead>
                 <tbody>
-                    {apartments.map((apartment) => (
+                    {apartments.map((apartment: Apartment) => (
                         <tr key={apartment.id}>
                             <td>{apartment.number}</td>
                             <td>{apartment.description}</td>
