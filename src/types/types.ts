@@ -15,8 +15,10 @@ export interface Pin {
 }
 
 export interface RFID {
+    id: number;
     user_id: number;
     hashed_uuid: string;
+    last_four_digits: string;
     label: string;
     creator_email: string;
     created_at: string;

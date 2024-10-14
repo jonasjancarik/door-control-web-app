@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
+import { User, RFID } from '@/types/types';
 
-const RfidManagement = ({ user, token }) => {
+interface RfidManagementProps {
+    user: User;
+    token: string;
+}
+
+const RfidManagement: React.FC<RfidManagementProps> = ({ user, token }) => {
     const [rfidTags, setRfidTags] = useState([]);
     const [newRfidUuid, setNewRfidUuid] = useState('');
     const [newRfidLabel, setNewRfidLabel] = useState('');
@@ -26,7 +32,7 @@ const RfidManagement = ({ user, token }) => {
         }
     };
 
-    const handleAddRfid = async (e) => {
+    const handleAddRfid = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfids`, {
@@ -45,7 +51,7 @@ const RfidManagement = ({ user, token }) => {
         }
     };
 
-    const handleDeleteRfid = async (rfidId) => {
+    const handleDeleteRfid = async (rfidId: RFID['id']) => {
         try {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/rfids/${user.id}/${rfidId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -123,7 +129,7 @@ const RfidManagement = ({ user, token }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {rfidTags.map((rfid) => (
+                    {rfidTags.map((rfid: RFID) => (
                         <tr key={rfid.id}>
                             <td>...{rfid.last_four_digits}</td>
                             <td>{rfid.label}</td>
