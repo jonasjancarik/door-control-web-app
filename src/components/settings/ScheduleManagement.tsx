@@ -8,7 +8,7 @@ interface GuestScheduleManagementProps {
     token: string;
 }
 
-const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user, token }) => {
+const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user, token }) => {
     const [recurringSchedules, setRecurringSchedules] = useState([]);
     const [oneTimeAccess, setOneTimeAccess] = useState([]);
     const [newRecurringSchedule, setNewRecurringSchedule] = useState({ day_of_week: 0, start_time: '', end_time: '' });
@@ -211,4 +211,4 @@ const GuestScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user,
     );
 };
 
-export default GuestScheduleManagement;
+export default ScheduleManagement;

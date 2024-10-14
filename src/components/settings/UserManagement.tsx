@@ -3,7 +3,7 @@ import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import PinManagement from './PinManagement';
 import RfidManagement from './RfidManagement';
-import GuestScheduleManagement from './GuestScheduleManagement';
+import ScheduleManagement from './ScheduleManagement';
 import { User, Apartment } from '@/types/types';
 
 interface UserManagementProps {
@@ -220,7 +220,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (
-                        <GuestScheduleManagement user={selectedUser} token={token} />
+                        <ScheduleManagement user={selectedUser} token={token} />
                     ) : (
                         <p>No user selected</p>
                     )}
