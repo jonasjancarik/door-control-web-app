@@ -1,18 +1,13 @@
-// components/Navbar.js
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-// import { FaHome, FaCog, FaSignOutAlt } from 'react-icons/fa';
-import { MdHome, MdSettings, MdLogout  } from "react-icons/md";
+import { MdHome, MdSettings  } from "react-icons/md";
+import { useAuth } from '../contexts/AuthContext';
 
-const AppNavbar = ({ user }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+const AppNavbar = () => {
+    const { user } = useAuth();
     const router = useRouter();
-
-    useEffect(() => {
-        setIsAuthenticated(!!user);
-    }, [user]);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem('token');
@@ -26,7 +21,7 @@ const AppNavbar = ({ user }) => {
                 <Navbar.Brand className='mb-auto d-lg-block d-none' as={Link} href="/">
                     {process.env.NEXT_PUBLIC_WEB_APP_TITLE}
                 </Navbar.Brand>
-                {isAuthenticated && user ? (
+                {user ? (
                     <>
                         <div className='ms-auto d-none d-lg-flex'>
 
@@ -35,9 +30,6 @@ const AppNavbar = ({ user }) => {
                             <Nav className='ms-auto'>
                                 <Nav.Link>{process.env.NEXT_PUBLIC_WEB_APP_SUBTITLE}</Nav.Link>
                                 <Nav.Link className="ms-auto" as={Link} href="/settings">Settings</Nav.Link>
-                                <Nav.Link className="ms-auto" onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                                    {user.name} ({user.role}) (Logout)
-                                </Nav.Link>
                             </Nav>
                         </Navbar.Collapse>
                         </div>
@@ -49,10 +41,6 @@ const AppNavbar = ({ user }) => {
                             <Nav.Link as={Link} href="/settings">
                                 {/* <FaCog size={36} color="fffdf4" /> */}
                                 <MdSettings size={36} color="fffdf4" />
-                            </Nav.Link>
-                            <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                                {/* <FaSignOutAlt size={36} color="fffdf4" /> */}
-                                <MdLogout size={36} color="fffdf4" />
                             </Nav.Link>
                         </div>
                     </>

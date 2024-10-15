@@ -3,13 +3,15 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/router';
 
 interface UserProfileProps {
     user: User;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
-    const { token } = useAuth();
+    const { token, logout } = useAuth();
+    const router = useRouter();
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
     const [apartmentNumber, setApartmentNumber] = useState(user.apartment_number);
@@ -33,6 +35,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
             setStatus('Failed to update profile');
             console.error('Error updating profile:', error);
         }
+    };
+
+    const handleLogout = () => {
+        logout();
+        router.push('/');
     };
 
     return (
@@ -72,8 +79,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                     disabled
                 />
             </Form.Group>
-            <Button variant="primary" type="submit">
+            <Button variant="primary" type="submit" className="me-2">
                 Update Profile
+            </Button>
+            <Button variant="danger" onClick={handleLogout}>
+                Logout
             </Button>
             {status && <Alert className="mt-3" variant={status.includes('successfully') ? 'success' : 'danger'}>{status}</Alert>}
         </Form>
