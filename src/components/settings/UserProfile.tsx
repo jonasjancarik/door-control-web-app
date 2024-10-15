@@ -5,26 +5,29 @@ import { User } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/router';
 
-interface UserProfileProps {
-    user: User;
-}
+interface UserProfileProps { }
 
-const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
-    const { token, logout } = useAuth();
+const UserProfile: React.FC<UserProfileProps> = () => {
+    const { token, logout, user } = useAuth();
     const router = useRouter();
-    const [name, setName] = useState(user.name);
-    const [email, setEmail] = useState(user.email);
-    const [apartmentNumber, setApartmentNumber] = useState(user.apartment_number);
+    const [name, setName] = useState(user?.name || '');
+    const [email, setEmail] = useState(user?.email || '');
+    const [apartmentNumber, setApartmentNumber] = useState(user?.apartment_number || '');
     const [status, setStatus] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus('');
 
+        if (!user) {
+            setStatus('User not logged in');
+            return;
+        }
+
         try {
             const response = await axios.put(
                 `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
-                { name, email, apartment_number: apartmentNumber },
+                { name: user.name, email: user.email, apartment_number: user.apartment_number },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -75,7 +78,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <Form.Label>Role</Form.Label>
                 <Form.Control
                     type="text"
-                    value={user.role}
+                    value={user?.role || ''}
                     disabled
                 />
             </Form.Group>
