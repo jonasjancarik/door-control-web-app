@@ -7,12 +7,10 @@ import ScheduleManagement from './ScheduleManagement';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface UserManagementProps {
-    user: User;
-}
+interface UserManagementProps { }
 
-const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
-    const { token } = useAuth();
+const UserManagement: React.FC<UserManagementProps> = () => {
+    const { token, user } = useAuth();
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showPinModal, setShowPinModal] = useState(false);
@@ -41,7 +39,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(user.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment_number === user.apartment_number));
+            setUsers(user?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment_number === user?.apartment_number));
         } catch (error) {
             console.error('Failed to fetch users:', error);
             if (error instanceof Error && 'response' in error) {
@@ -55,7 +53,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
                 setError('Failed to fetch users. Please try again.');
             }
         }
-    }, [token, user.role, user.apartment_number]);
+    }, [token, user?.role, user?.apartment_number]);
 
     useEffect(() => {
         fetchApartments();
@@ -217,7 +215,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
                             >
                                 <option value="apartment_admin">Apartment Admin</option>
                                 <option value="guest">Guest</option>
-                                {user.role === 'admin' && <option value="admin">Admin</option>}
+                                {user?.role === 'admin' && <option value="admin">Admin</option>}
                             </Form.Select>
                         </Form.Group>
                         <Button variant="primary" type="submit">Submit</Button>

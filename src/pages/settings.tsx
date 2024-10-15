@@ -7,16 +7,8 @@ import UserManagement from '../components/settings/UserManagement';
 import ApartmentManagement from '../components/settings/ApartmentManagement';
 
 const Settings = () => {
-    const { user, token, loading } = useAuth();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('profile');
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!user) {
-        return <div>Please log in to access settings.</div>;
-    }
 
     return (
         <div className="d-flex flex-column vh-100 dvh-100">
@@ -31,16 +23,14 @@ const Settings = () => {
                                 className="mb-3"
                             >
                                 <Tab eventKey="profile" title="Profile">
-                                    <UserProfile user={user}/>
+                                    <UserProfile />
                                 </Tab>
-                                {user.role !== 'guest' && (
-                                    <Tab eventKey="users" title="User Management">
-                                        <UserManagement user={user}/>
-                                    </Tab>
-                                )}
-                                {user.role === 'admin' && (
+                                <Tab eventKey="users" title="User Management">
+                                    <UserManagement />
+                                </Tab>
+                                {user && user.role === 'admin' && (
                                     <Tab eventKey="apartments" title="Apartment Management">
-                                        <ApartmentManagement user={user} />
+                                        <ApartmentManagement />
                                     </Tab>
                                 )}
                             </Tabs>

@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface ApartmentManagementProps {
-    user: User;
-}
+interface ApartmentManagementProps { }
 
-const ApartmentManagement: React.FC<ApartmentManagementProps> = ({ user }) => {
-    const { token } = useAuth();
+const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
+    const { token, user } = useAuth();
     const [apartments, setApartments] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
@@ -17,11 +15,7 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = ({ user }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
-        fetchApartments();
-    }, []);
-
-    const fetchApartments = async () => {
+    const fetchApartments = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -31,7 +25,12 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = ({ user }) => {
             console.error('Failed to fetch apartments:', error);
             setError('Failed to fetch apartments. Please try again.');
         }
-    };
+    }, [token]);
+
+    useEffect(() => {
+        fetchApartments();
+    }, [fetchApartments]);
+
 
     const handleAddApartment = () => {
         setSelectedApartment(null);
