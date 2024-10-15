@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Form, Alert, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import { User, RecurringSchedule, OneTimeAccess } from '@/types/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GuestScheduleManagementProps {
     user: User;
-    token: string;
 }
 
-const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user, token }) => {
+const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user }) => {
+    const { token } = useAuth();
     const [recurringSchedules, setRecurringSchedules] = useState([]);
     const [oneTimeAccess, setOneTimeAccess] = useState([]);
     const [newRecurringSchedule, setNewRecurringSchedule] = useState({ day_of_week: 0, start_time: '', end_time: '' });

@@ -3,8 +3,9 @@ import { Form, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { AxiosError } from 'axios';
+import { User } from '@/types/types';
 
-const LoginForm = ({ onLogin }) => {
+const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }) => {
     const [email, setEmail] = useState('');
     const [loginCode, setLoginCode] = useState('');
     const [emailSent, setEmailSent] = useState(false);
@@ -13,10 +14,12 @@ const LoginForm = ({ onLogin }) => {
 
     const router = useRouter();
 
-    const handleLogin = useCallback(async (code) => {
+    const handleLogin = useCallback(async (code: string | null = null) => {
         try {
+            // Use the provided code or fallback to the state value
+            const loginCodeToUse = code || loginCode;
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/tokens`, { 
-                login_code: code || loginCode,
+                login_code: loginCodeToUse,
                 email: email
             });
             if (response.status === 201) {
@@ -43,8 +46,8 @@ const LoginForm = ({ onLogin }) => {
         console.log(process.env)
         const { login_code } = router.query;
         if (login_code) {
-            setLoginCode(login_code);
-            handleLogin(login_code); // Automatically send the exchange code request
+            setLoginCode(login_code as string);
+            handleLogin(login_code as string); // Automatically send the exchange code request
         }
     }, [router.query, handleLogin]);
 
@@ -59,11 +62,11 @@ const LoginForm = ({ onLogin }) => {
                 setEmailStatus('Failed to send email.');
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 422) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 422) {
                     setEmailStatus('Invalid email address.');
                 } else {
-                    setEmailStatus('An error occurred: ' + error.response.data.error.detail);
+                    setEmailStatus('An error occurred: ' + error.response?.data.error.detail);
                 }
             } else {
                 setEmailStatus('Failed to connect to the API.');

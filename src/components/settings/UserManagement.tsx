@@ -5,13 +5,14 @@ import PinManagement from './PinManagement';
 import RfidManagement from './RfidManagement';
 import ScheduleManagement from './ScheduleManagement';
 import { User, Apartment } from '@/types/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserManagementProps {
     user: User;
-    token: string;
 }
 
-const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
+const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
+    const { token } = useAuth();
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showPinModal, setShowPinModal] = useState(false);
@@ -155,7 +156,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (
-                        <PinManagement user={selectedUser} token={token} />
+                        <PinManagement user={selectedUser} />
                     ) : (
                         <p>No user selected</p>
                     )}
@@ -168,7 +169,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (
-                        <RfidManagement user={selectedUser} token={token} />
+                        <RfidManagement user={selectedUser} />
                     ) : (
                         <p>No user selected</p>
                     )}
@@ -228,7 +229,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user, token }) => {
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (
-                        <ScheduleManagement user={selectedUser} token={token} />
+                        <ScheduleManagement user={selectedUser} />
                     ) : (
                         <p>No user selected</p>
                     )}

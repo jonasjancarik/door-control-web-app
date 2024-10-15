@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User, Apartment } from '@/types/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ApartmentManagementProps {
     user: User;
-    token: string;
 }
 
-const ApartmentManagement: React.FC<ApartmentManagementProps> = ({ user, token }) => {
+const ApartmentManagement: React.FC<ApartmentManagementProps> = ({ user }) => {
+    const { token } = useAuth();
     const [apartments, setApartments] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);

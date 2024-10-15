@@ -5,57 +5,15 @@ import UnlockButton from '../components/UnlockButton';
 import { Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import Login from '../components/Login';
-import Dashboard from '../components/Dashboard';
-import UserManagement from '../components/UserManagement';
+import { useAuth } from '@/contexts/AuthContext';
+import { User } from '@/types/types';
 
 const Home = () => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState('');
     const router = useRouter();
-    const { user: authUser } = useAuth();
+    const { user, login } = useAuth();
 
-    const checkLocalStorage = () => {
-        const storedToken = localStorage.getItem('token');
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(storedUser);
-        } else {
-            setToken('');
-            setUser(null);
-        }
-    };
-
-    useEffect(() => {
-        checkLocalStorage();
-    }, []);
-
-    useEffect(() => {
-        const handleStorageChange = () => {
-            checkLocalStorage();
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    }, []);
-
-    useEffect(() => {
-        router.events.on('routeChangeComplete', checkLocalStorage);
-        return () => {
-            router.events.off('routeChangeComplete', checkLocalStorage);
-        };
-    }, [router.events]);
-
-    const handleLogin = (token, user) => {
-        setToken(token);
-        setUser(user);
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
+    const handleLogin = (token: string, user: User) => {
+        login(token, user);
     };
 
     return (
@@ -65,7 +23,7 @@ const Home = () => {
                 {!user ? (
                     <LoginForm onLogin={handleLogin} />
                 ) : (
-                    <UnlockButton token={token} />
+                    <UnlockButton />
                 )}
             </Container>
         </div>

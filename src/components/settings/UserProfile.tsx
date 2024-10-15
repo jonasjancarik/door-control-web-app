@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User } from '@/types/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfileProps {
     user: User;
-    token: string;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ user, token }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
+    const { token } = useAuth();
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
     const [apartmentNumber, setApartmentNumber] = useState(user.apartment_number);

@@ -27,20 +27,20 @@ const Settings = () => {
                         <h2>Settings</h2>
                         <Tabs
                             activeKey={activeTab}
-                            onSelect={(k) => setActiveTab(k)}
+                            onSelect={(k) => k && setActiveTab(k)}
                             className="mb-3"
                         >
                             <Tab eventKey="profile" title="Profile">
-                                <UserProfile user={user} token={token} />
+                                <UserProfile user={user}/>
                             </Tab>
                             {user.role !== 'guest' && (
                                 <Tab eventKey="users" title="User Management">
-                                    <UserManagement user={user} token={token} />
+                                    <UserManagement user={user}/>
                                 </Tab>
                             )}
                             {user.role === 'admin' && (
                                 <Tab eventKey="apartments" title="Apartment Management">
-                                    <ApartmentManagement user={user} token={token} />
+                                    <ApartmentManagement user={user} />
                                 </Tab>
                             )}
                         </Tabs>

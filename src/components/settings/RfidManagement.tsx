@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { User, RFID } from '@/types/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface RfidManagementProps {
     user: User;
-    token: string;
 }
 
-const RfidManagement: React.FC<RfidManagementProps> = ({ user, token }) => {
+const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
+    const { token } = useAuth();
     const [rfidTags, setRfidTags] = useState([]);
     const [newRfidUuid, setNewRfidUuid] = useState('');
     const [newRfidLabel, setNewRfidLabel] = useState('');

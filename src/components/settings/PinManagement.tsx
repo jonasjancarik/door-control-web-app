@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User, PIN } from '@/types/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PinManagementProps {
     user: User;
-    token: string;
 }
 
-const PinManagement: React.FC<PinManagementProps> = ({ user, token }) => {
+const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
+    const { token } = useAuth();
     const [pins, setPins] = useState([]);
     const [newPin, setNewPin] = useState('');
     const [newPinLabel, setNewPinLabel] = useState('');
