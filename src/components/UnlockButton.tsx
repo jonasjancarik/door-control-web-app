@@ -1,33 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { motion, useAnimation } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 
-const UnlockButton = ({ token }) => {
+const UnlockButton = () => {
     const [status, setStatus] = useState('Unlock Door');
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
     const controls = useAnimation();
+    const { token } = useAuth();
+    const isMounted = useRef(true);
 
-    const handleUnlock = async () => {
-        setIsButtonDisabled(true);
+    useEffect(() => {
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
 
-        function resetButton() {
+    const resetButton = useCallback(() => {
+        if (isMounted.current) {
             controls.start({ strokeDashoffset: 0, transition: { duration: 0.5, ease: 'linear' } });
             setIsButtonDisabled(false);
             setStatus("Unlock Door");
         }
+    }, [controls]);
 
+    const handleUnlock = useCallback(async () => {
+        if (!isMounted.current) return;
+
+        setIsButtonDisabled(true);
         setStatus('Unlocked...');
+
         controls.start({ strokeDashoffset: 364.424, transition: { duration: 10, ease: 'linear' } })
             .then(() => {
-                resetButton();
+                if (isMounted.current) {
+                    resetButton();
+                }
             });
 
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/doors/unlock`, null, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setStatus('Door unlocked successfully');
+            if (isMounted.current) {
+                setStatus('Door unlocked successfully');
+            }
         } catch (error) {
+            if (!isMounted.current) return;
             if (axios.isAxiosError(error) && error.response) {
                 const { status, data } = error.response;
                 if (status === 401) {
@@ -42,7 +60,7 @@ const UnlockButton = ({ token }) => {
             }
             resetButton();
         }
-    };
+    }, [controls, resetButton, token]);
 
     return (
         <div className="text-center" id="unlock-button-container">
