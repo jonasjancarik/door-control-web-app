@@ -27,7 +27,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         try {
             const response = await axios.put(
                 `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
-                { name: user.name, email: user.email, apartment_number: user.apartment_number },
+                { name, email, apartment_number: apartmentNumber },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
