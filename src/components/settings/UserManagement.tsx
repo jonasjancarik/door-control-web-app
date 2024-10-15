@@ -75,12 +75,14 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
     const handleAddUser = () => {
         setSelectedUser(null);
         setNewUser({ name: '', email: '', apartment_number: '', role: 'apartment_admin' });
+        fetchApartments(); // Refresh the apartments list
         setShowUserModal(true);
     };
 
     const handleEditUser = (user: User) => {
         setSelectedUser(user);
         setNewUser({ ...user });
+        fetchApartments(); // Refresh the apartments list
         setShowUserModal(true);
     };
 
