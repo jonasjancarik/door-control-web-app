@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { User, RFID } from '@/types/types';
@@ -17,11 +17,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
     const [success, setSuccess] = useState('');
     const [isReading, setIsReading] = useState(false);
 
-    useEffect(() => {
-        fetchRfidTags();
-    }, [user]);
-
-    const fetchRfidTags = async () => {
+    const fetchRfidTags = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}/rfids`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -31,7 +27,11 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
             console.error('Failed to fetch RFID tags:', error);
             setError('Failed to fetch RFID tags. Please try again.');
         }
-    };
+    }, [user.id, token]);
+
+    useEffect(() => {
+        fetchRfidTags();
+    }, [user, fetchRfidTags]);
 
     const handleAddRfid = async (e: React.FormEvent) => {
         e.preventDefault();

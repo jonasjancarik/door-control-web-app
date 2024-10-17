@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User, PIN } from '@/types/types';
@@ -16,11 +16,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
-        fetchPins();
-    }, [user]);
-
-    const fetchPins = async () => {
+    const fetchPins = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}/pins`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -30,7 +26,11 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
             console.error('Failed to fetch PINs:', error);
             setError('Failed to fetch PINs. Please try again.');
         }
-    };
+    }, [user.id, token]);
+
+    useEffect(() => {
+        fetchPins();
+    }, [user, fetchPins]);
 
     const handleAddPin = async (e: React.FormEvent) => {
         e.preventDefault();
