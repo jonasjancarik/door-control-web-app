@@ -21,6 +21,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
     const [modalError, setModalError] = useState('');
     const [apartments, setApartments] = useState([]);
     const [showGuestScheduleModal, setShowGuestScheduleModal] = useState(false);
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
     const fetchApartments = useCallback(async () => {
         try {
@@ -124,6 +126,35 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
         setShowGuestScheduleModal(true);
     };
 
+    const handleDeleteUser = (user: User) => {
+        setUserToDelete(user);
+        setShowDeleteConfirmation(true);
+    };
+
+    const confirmDeleteUser = async () => {
+        if (!userToDelete) return;
+
+        try {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/users/${userToDelete.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setShowDeleteConfirmation(false);
+            fetchUsers();
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+            if (error instanceof Error && 'response' in error) {
+                const axiosError = error as { response?: { data?: { error?: { detail?: string } } } };
+                if (axiosError.response?.data?.error?.detail) {
+                    setError(axiosError.response.data.error.detail);
+                } else {
+                    setError('Failed to delete user. Please try again.');
+                }
+            } else {
+                setError('Failed to delete user. Please try again.');
+            }
+        }
+    };
+
     return (
         <div>
             <h3>User Management</h3>
@@ -150,6 +181,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                                 {u.role === 'guest' && (
                                     <Button variant="info" onClick={() => handleGuestScheduleManagement(u)}>Manage Schedule</Button>
                                 )}
+                                <Button variant="danger" onClick={() => handleDeleteUser(u)} className="me-2">Delete</Button>
                             </td>
                         </tr>
                     ))}
@@ -240,6 +272,23 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                         <p>No user selected</p>
                     )}
                 </Modal.Body>
+            </Modal>
+
+            <Modal show={showDeleteConfirmation} onHide={() => setShowDeleteConfirmation(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm User Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete the user {userToDelete?.name}?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteConfirmation(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={confirmDeleteUser}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
             </Modal>
         </div>
     );
