@@ -39,7 +39,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(user?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment_number === user?.apartment_number));
+            setUsers(user?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment.number === user?.apartment.number));
         } catch (error) {
             console.error('Failed to fetch users:', error);
             if (error instanceof Error && 'response' in error) {
@@ -53,7 +53,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                 setError('Failed to fetch users. Please try again.');
             }
         }
-    }, [token, user?.role, user?.apartment_number]);
+    }, [token, user?.role, user?.apartment?.number]);
 
     useEffect(() => {
         fetchApartments();
@@ -143,7 +143,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                         <tr key={u.id}>
                             <td>{u.name}</td>
                             <td>{u.email}</td>
-                            <td>{u.apartment_number}</td>
+                            <td>{u.apartment.number}</td>
                             <td>
                                 <Button variant="primary" onClick={() => handlePinManagement(u)} className="me-2">Manage PINs</Button>
                                 <Button variant="secondary" onClick={() => handleRfidManagement(u)} className="me-2">Manage RFID</Button>
