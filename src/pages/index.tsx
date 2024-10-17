@@ -1,4 +1,3 @@
-import AppNavbar from '../components/Navbar';
 import UnlockButton from '../components/UnlockButton';
 import { Container } from 'react-bootstrap';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,12 +10,9 @@ const Home = () => {
     }
 
     return (
-        <div className="d-flex flex-column vh-100">
-            <AppNavbar />
-            <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center">
-                <UnlockButton />
-            </Container>
-        </div>
+        <Container className="d-flex flex-grow-1 flex-column justify-content-center align-items-center h-100">
+            <UnlockButton />
+        </Container>
     );
 };
 

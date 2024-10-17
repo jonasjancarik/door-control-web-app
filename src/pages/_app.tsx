@@ -5,14 +5,40 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/globals.css';
+import AppNavbar from '../components/Navbar';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
       <AuthWrapper>
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </AuthWrapper>
     </AuthProvider>
+  );
+}
+
+function Layout({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  if (router.pathname === '/login') {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="d-flex flex-column vh-100">
+      <div className="d-none d-lg-block">
+        <AppNavbar />
+      </div>
+      <div className="flex-grow-1 overflow-auto">
+        {children}
+      </div>
+      <div className="d-lg-none">
+        <AppNavbar />
+      </div>
+    </div>
   );
 }
 
