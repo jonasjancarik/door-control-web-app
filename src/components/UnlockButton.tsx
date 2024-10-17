@@ -42,7 +42,7 @@ const UnlockButton = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (isMounted.current) {
-                setStatus('Door unlocked successfully');
+                setStatus('Unlock door');
             }
         } catch (error) {
             if (!isMounted.current) return;
@@ -64,7 +64,11 @@ const UnlockButton = () => {
 
     return (
         <div className="text-center" id="unlock-button-container">
-            <button onClick={handleUnlock} disabled={isButtonDisabled} className="button-round">
+            <button 
+                onClick={handleUnlock} 
+                disabled={isButtonDisabled} 
+                className="button-round text-black"
+            >
                 {isButtonDisabled ? 'Unlocked...' : status}
             </button>
             <motion.svg
