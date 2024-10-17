@@ -11,6 +11,7 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
     const [emailSent, setEmailSent] = useState(false);
     const [emailStatus, setEmailStatus] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loginFailed, setLoginFailed] = useState(false);
 
     const router = useRouter();
 
@@ -26,6 +27,7 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
                 onLogin(response.data.access_token, response.data.user);
             } else {
                 setEmailStatus('Failed to login.');
+                setLoginFailed(true);
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -39,6 +41,7 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
             } else {
                 setEmailStatus('Failed to connect to the API.');
             }
+            setLoginFailed(true);
         }
     }, [loginCode, onLogin, email]);
 
@@ -76,6 +79,14 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
         }
     };
 
+    const handleStartOver = () => {
+        // setEmail('');
+        setLoginCode('');
+        setEmailSent(false);
+        setEmailStatus('');
+        setLoginFailed(false);
+    };
+
     return (
         <Container>
             <Row className="justify-content-center">
@@ -111,6 +122,11 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
                                 <Button variant="secondary" onClick={() => handleLogin()} disabled={!loginCode} className="w-100">
                                     Login
                                 </Button>
+                                {loginFailed && (
+                                    <Button variant="link" onClick={handleStartOver} className="mt-2">
+                                        Start Over
+                                    </Button>
+                                )}
                             </>
                         )}
                         {emailStatus && <div className="mt-3">{emailStatus}</div>}
