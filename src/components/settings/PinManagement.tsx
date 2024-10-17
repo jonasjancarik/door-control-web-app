@@ -60,7 +60,11 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
             fetchPins();
         } catch (error) {
             console.error('Failed to delete PIN:', error);
-            setError('Failed to delete PIN. Please try again.');
+            if (axios.isAxiosError(error) && error.response) {
+                setError(`Failed to delete PIN: ${error.response.data.detail}`);
+            } else {
+                setError('Failed to delete PIN. Please try again.');
+            }
         }
     };
 

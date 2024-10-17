@@ -1,19 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { User } from '@/types/types';
+import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/router';
 
 interface UserProfileProps { }
 
 const UserProfile: React.FC<UserProfileProps> = () => {
-    const { token, logout, user } = useAuth();
+    const { token, logout, user, updateUser } = useAuth();
     const router = useRouter();
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
-    const [apartmentNumber, setApartmentNumber] = useState(user?.apartment_number || '');
+    const [apartmentNumber, setApartmentNumber] = useState(user?.apartment?.number || '');  // todo!: why would apartment be undefined?
     const [status, setStatus] = useState('');
+    const [apartments, setApartments] = useState<Apartment[]>([]);
+
+    const fetchApartments = useCallback(async () => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/apartments`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setApartments(response.data);
+        } catch (error) {
+            console.error('Failed to fetch apartments:', error);
+            setStatus('Failed to fetch apartments. Please try again.');
+        }
+    }, [token]);
+
+    useEffect(() => {
+        fetchApartments();
+    }, [fetchApartments]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,6 +50,12 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
             if (response.status === 200) {
                 setStatus('Profile updated successfully');
+                // Fetch the updated user data and update the global user object
+                const updatedUserResponse = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                updateUser(updatedUserResponse.data);
             }
         } catch (error) {
             setStatus('Failed to update profile');
@@ -65,14 +88,20 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                     required
                 />
             </Form.Group>
-            <Form.Group className="mb-3">
-                <Form.Label>Apartment Number</Form.Label>
-                <Form.Control
-                    type="text"
-                    value={apartmentNumber}
-                    onChange={(e) => setApartmentNumber(e.target.value)}
-                    required
-                />
+            <Form.Group controlId="exampleSelect" className="mb-3">
+                <Form.Label>Select an option</Form.Label>
+                <Form.Control as="select" aria-label="Select an option" value={apartmentNumber} onChange={(e) => setApartmentNumber(e.target.value)} required>
+                    <option value="">Select an apartment</option>
+                    {apartments.map((apartment: Apartment) => (
+                        <option 
+                            key={apartment.id} 
+                            value={apartment.number}
+                            selected={apartment.number === user?.apartment?.number}
+                        >
+                            {apartment.number}
+                        </option>
+                    ))}
+                </Form.Control>
             </Form.Group>
             <Form.Group className="mb-3">
                 <Form.Label>Role</Form.Label>

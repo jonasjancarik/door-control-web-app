@@ -3,7 +3,9 @@ export interface User {
     name: string;
     email: string;
     role: 'admin' | 'apartment_admin' | 'guest';
-    apartment_number: string;
+    creator_id: number;
+    apartment_id: string;
+    apartment: Apartment;
     recurring_schedules?: RecurringSchedule[];
     one_time_access?: OneTimeAccess[];
 }

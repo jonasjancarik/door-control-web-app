@@ -7,9 +7,9 @@ import ScheduleManagement from './ScheduleManagement';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface UserManagementProps { }
+interface UserManagementProps { isActive: boolean; }
 
-const UserManagement: React.FC<UserManagementProps> = () => {
+const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
     const { token, user } = useAuth();
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -59,6 +59,12 @@ const UserManagement: React.FC<UserManagementProps> = () => {
         fetchApartments();
         fetchUsers();
     }, [fetchApartments, fetchUsers]);
+
+    useEffect(() => {
+        if (isActive) {
+            fetchUsers();
+        }
+    }, [isActive, fetchUsers]);
 
     const handlePinManagement = (user: User) => {
         setSelectedUser(user);

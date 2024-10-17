@@ -54,7 +54,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
 
     const handleDeleteRfid = async (rfidId: RFID['id']) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/rfids/${user.id}/${rfidId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/rfids/${rfidId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('RFID tag deleted successfully');
