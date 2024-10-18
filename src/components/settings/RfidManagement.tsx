@@ -39,6 +39,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfids`, {
                 uuid: newRfidUuid,
                 label: newRfidLabel,
+                user_id: user.id,
             }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
