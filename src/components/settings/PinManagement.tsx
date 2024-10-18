@@ -38,6 +38,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
                 pin: newPin,
                 label: newPinLabel,
+                user_id: user.id,
             }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
