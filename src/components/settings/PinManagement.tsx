@@ -8,6 +8,31 @@ interface PinManagementProps {
     user: User;
 }
 
+const commonPins = [
+    '1234', '0000', '7777', '2000', '2222', '9999', '5555', '1122', '8888', '2001',
+    '1111', '1212', '1004', '4444', '6969', '3333', '6666', '1313', '4321', '1010'
+];  // according to https://informationisbeautiful.net/visualizations/most-common-pin-codes/
+
+const REQUIRED_PIN_LENGTH = parseInt(process.env.NEXT_PUBLIC_REQUIRED_PIN_LENGTH || '4');
+
+const unsafePinPatterns = [  // todo: use files from https://github.com/Slon104/Common-PIN-Analysis-from-haveibeenpwned.com
+    { regex: new RegExp(`^(${commonPins.join('|')})$`), reason: 'commonly used PIN' },
+    { regex: /^(0123|1234|2345|3456|4567|5678|6789|7890)$/, reason: 'consecutive numbers' },
+    { regex: /^(9876|8765|7654|6543|5432|4321|3210)$/, reason: 'reverse consecutive numbers' },
+    { regex: /^(1379|1397|2468|2486)$/, reason: 'common keyboard pattern' },
+    { regex: /^(19|20)\d{2}$/, reason: 'common year of birth' },
+    { regex: /^(.)\1{3}$/, reason: 'repeated digits' },
+];
+
+const isUnsafePin = (pin: string): boolean => {
+    return unsafePinPatterns.some(pattern => pattern.regex.test(pin));
+};
+
+const getUnsafePinReason = (pin: string): string => {
+    const matchedPattern = unsafePinPatterns.find(pattern => pattern.regex.test(pin));
+    return matchedPattern ? matchedPattern.reason : 'unknown reason';
+};
+
 const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
     const { token } = useAuth();
     const [pins, setPins] = useState([]);
@@ -15,6 +40,8 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
     const [newPinLabel, setNewPinLabel] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [pinError, setPinError] = useState('');
+    const [pinFeedback, setPinFeedback] = useState('');
 
     const fetchPins = useCallback(async () => {
         try {
@@ -32,8 +59,36 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
         fetchPins();
     }, [user, fetchPins]);
 
+    const validatePin = (pin: string) => {
+        if (pin.length !== REQUIRED_PIN_LENGTH) {
+            return `PIN must be exactly ${REQUIRED_PIN_LENGTH} digits.`;
+        }
+        if (!/^\d+$/.test(pin)) {
+            return 'PIN must contain only digits.';
+        }
+        if (isUnsafePin(pin)) {
+            return `This PIN is not allowed: ${getUnsafePinReason(pin)}`;
+        }
+        return '';
+    };
+
+    const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPinValue = e.target.value;
+        setNewPin(newPinValue);
+        setPinFeedback(validatePin(newPinValue));
+    };
+
     const handleAddPin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+        setSuccess('');
+
+        const pinValidationError = validatePin(newPin);
+        if (pinValidationError) {
+            setPinFeedback(pinValidationError);
+            return;
+        }
+
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
                 pin: newPin,
@@ -44,6 +99,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
             });
             setNewPin('');
             setNewPinLabel('');
+            setPinFeedback('');
             setSuccess('PIN added successfully');
             fetchPins();
         } catch (error) {
@@ -80,9 +136,17 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                     <Form.Control
                         type="text"
                         value={newPin}
-                        onChange={(e) => setNewPin(e.target.value)}
-                        placeholder="Enter 4-digit PIN"
+                        onChange={handlePinChange}
+                        placeholder={`Enter ${REQUIRED_PIN_LENGTH}-digit PIN`}
+                        isInvalid={!!pinFeedback}
+                        isValid={newPin.length > 0 && !pinFeedback}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {pinFeedback}
+                    </Form.Control.Feedback>
+                    <Form.Control.Feedback type="valid">
+                        PIN is valid
+                    </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="mb-2">
                     <Form.Label>PIN Label</Form.Label>
