@@ -68,8 +68,12 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
             if (error instanceof AxiosError) {
                 if (error.response?.status === 422) {
                     setEmailStatus('Invalid email address.');
-                } else {
+                } else if (error.response) {
                     setEmailStatus('An error occurred: ' + error.response?.data.error.detail);
+                } else if (error.message === 'Network Error') {
+                    setEmailStatus('That didn\'t work :( Either the server is down or you are offline.');
+                } else {
+                    setEmailStatus('An unexpected error occurred');
                 }
             } else {
                 setEmailStatus('Failed to connect to the API.');
