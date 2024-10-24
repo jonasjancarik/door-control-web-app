@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Card } from 'react-bootstrap';
 import axios from 'axios';
 import PinManagement from './PinManagement';
 import RfidManagement from './RfidManagement';
@@ -43,7 +43,27 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(user?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment?.number === user?.apartment?.number));
+            let usersData = user?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment?.number === user?.apartment?.number);
+            
+            // Sort users by apartment number (numerically if possible) and then by name
+            usersData.sort((a: User, b: User) => {
+                const aNumber = parseInt(a.apartment.number, 10);
+                const bNumber = parseInt(b.apartment.number, 10);
+
+                if (!isNaN(aNumber) && !isNaN(bNumber)) {
+                    if (aNumber === bNumber) {
+                        return a.name.localeCompare(b.name);
+                    }
+                    return aNumber - bNumber;
+                } else {
+                    if (a.apartment.number === b.apartment.number) {
+                        return a.name.localeCompare(b.name);
+                    }
+                    return a.apartment.number.localeCompare(b.apartment.number);
+                }
+            });
+
+            setUsers(usersData);
         } catch (error) {
             console.error('Failed to fetch users:', error);
             if (error instanceof Error && 'response' in error) {
@@ -138,36 +158,45 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
             <Button variant="primary" onClick={handleAddUser} className="mb-3">Add New User</Button>
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Apartment</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map((u: User) => (
-                        <tr key={u.id}>
-                            <td>{u.name}</td>
-                            <td>{u.email}</td>
-                            <td>{u.role}</td>
-                            <td>{u.apartment.number}</td>
-                            <td>
-                                <Button variant="primary" onClick={() => handlePinManagement(u)} className="me-2">Manage PINs</Button>
-                                <Button variant="secondary" onClick={() => handleRfidManagement(u)} className="me-2">Manage RFIDs</Button>
-                                {u.role === 'guest' && (
-                                    <Button variant="info" onClick={() => handleGuestScheduleManagement(u)}>Manage Schedule</Button>
-                                )}
-                                <Button variant="danger" onClick={() => handleDeleteUser(u)} className="me-2">Delete</Button>
-                                <Button variant="primary" onClick={() => handleEditUser(u)} className="me-2">Edit</Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            
+            {(() => {
+                const usersByApartment = users.reduce((acc: { [key: string]: User[] }, user: User) => {
+                    const apartmentNumber = user.apartment.number;
+                    if (!acc[apartmentNumber]) {
+                        acc[apartmentNumber] = [];
+                    }
+                    acc[apartmentNumber].push(user);
+                    return acc;
+                }, {});
+
+                return Object.entries(usersByApartment).map(([apartmentNumber, users]) => (
+                    <div key={apartmentNumber}>
+                        <h4>Apartment {apartmentNumber}</h4>
+                        <div className="d-flex flex-wrap">
+                            {users.map((u: User) => (
+                                <Card key={u.id} className="m-2" style={{ width: '18rem' }}>
+                                    <Card.Body>
+                                        <Card.Title>{u.name}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">{u.email}</Card.Subtitle>
+                                        <Card.Text>
+                                            Role: {u.role}
+                                        </Card.Text>
+                                        <div className="d-flex flex-wrap">
+                                            <Button variant="outline-primary" size="sm" onClick={() => handlePinManagement(u)} className="me-2 mb-2">Manage PINs</Button>
+                                            <Button variant="outline-secondary" size="sm" onClick={() => handleRfidManagement(u)} className="me-2 mb-2">Manage RFIDs</Button>
+                                            {u.role === 'guest' && (
+                                                <Button variant="outline-info" size="sm" onClick={() => handleGuestScheduleManagement(u)} className="me-2 mb-2">Manage Schedule</Button>
+                                            )}
+                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteUser(u)} className="me-2 mb-2">Delete</Button>
+                                            <Button variant="outline-success" size="sm" onClick={() => handleEditUser(u)} className="me-2 mb-2">Edit</Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                ));
+            })()}
 
             <Modal show={showPinModal} onHide={() => setShowPinModal(false)}>
                 <Modal.Header closeButton>

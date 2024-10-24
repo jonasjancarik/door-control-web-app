@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -88,27 +88,22 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
             <Button variant="primary" onClick={handleAddApartment} className="mb-3">Add New Apartment</Button>
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Apartment Number</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {apartments.map((apartment: Apartment) => (
-                        <tr key={apartment.id}>
-                            <td>{apartment.number}</td>
-                            <td>{apartment.description}</td>
-                            <td>
-                                <Button variant="info" onClick={() => handleEditApartment(apartment)} className="me-2">Edit</Button>
-                                <Button variant="danger" onClick={() => handleDeleteApartment(apartment.id)}>Delete</Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            <div className="d-flex flex-wrap">
+                {apartments.map((apartment: Apartment) => (
+                    <Card key={apartment.id} className="m-2" style={{ width: '18rem' }}>
+                        <Card.Body>
+                            <Card.Title>Apartment {apartment.number}</Card.Title>
+                            <Card.Text>
+                                {apartment.description}
+                            </Card.Text>
+                            <div className="d-flex flex-wrap">
+                                <Button variant="outline-info" size="sm" onClick={() => handleEditApartment(apartment)} className="me-2 mb-2">Edit</Button>
+                                <Button variant="outline-danger" size="sm" onClick={() => handleDeleteApartment(apartment.id)} className="me-2 mb-2">Delete</Button>
+                            </div>
+                        </Card.Body>
+                    </Card>
+                ))}
+            </div>
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
