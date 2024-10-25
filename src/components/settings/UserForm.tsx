@@ -5,17 +5,17 @@ import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserFormProps {
-    user: User | null;
+    targetUser: User | null;
     onSuccess: (updatedUser: User) => void;
     isAdmin?: boolean;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, isAdmin = false }) => {
-    const { token } = useAuth();
-    const [name, setName] = useState(user?.name || '');
-    const [email, setEmail] = useState(user?.email || '');
-    const [apartmentNumber, setApartmentNumber] = useState(user?.apartment?.number || '');
-    const [role, setRole] = useState(user?.role || '');
+const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = false }) => {
+    const { token, user } = useAuth();
+    const [name, setName] = useState(targetUser?.name || '');
+    const [email, setEmail] = useState(targetUser?.email || '');
+    const [apartmentNumber, setApartmentNumber] = useState(targetUser?.apartment?.number || user?.apartment?.number || '');
+    const [role, setRole] = useState(targetUser?.role || '');
     const [status, setStatus] = useState('');
     const [apartments, setApartments] = useState<Apartment[]>([]);
 
@@ -36,13 +36,16 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, isAdmin = false })
     }, [fetchApartments]);
 
     useEffect(() => {
-        if (user) {
-            setName(user.name);
-            setEmail(user.email);
-            setApartmentNumber(user.apartment?.number || '');
-            setRole(user.role);
+        if (targetUser) {
+            setName(targetUser.name);
+            setEmail(targetUser.email);
+            setApartmentNumber(targetUser.apartment?.number || '');
+            setRole(targetUser.role);
+        } else if (!isAdmin) {
+            // For new users, set the apartment number to the current user's apartment
+            setApartmentNumber(user?.apartment?.number || '');
         }
-    }, [user]);
+    }, [targetUser, user, isAdmin]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,9 +55,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, isAdmin = false })
             const updatedUserData = { name, email, apartment: { number: apartmentNumber }, role };
             let response;
 
-            if (user) {
+            if (targetUser) {
                 response = await axios.put(
-                    `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/users/${targetUser.id}`,
                     updatedUserData,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -105,6 +108,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, isAdmin = false })
                     value={apartmentNumber}
                     onChange={(e) => setApartmentNumber(e.target.value)}
                     required
+                    disabled={!isAdmin}
                     aria-label="Select apartment"
                 >
                     <option value="">Select an apartment</option>
@@ -135,7 +139,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess, isAdmin = false })
                 </Form.Group>
             )}
             <Button variant="primary" type="submit">
-                {user ? 'Update User' : 'Add User'}
+                {targetUser ? 'Update User' : 'Add User'}
             </Button>
             {status && <Alert className="mt-3" variant={status.includes('successfully') ? 'success' : 'danger'}>{status}</Alert>}
         </Form>

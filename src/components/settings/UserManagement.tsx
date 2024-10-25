@@ -174,7 +174,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                         <h4>Apartment {apartmentNumber}</h4>
                         <div className="d-flex flex-wrap">
                             {users.map((u: User) => (
-                                <Card key={u.id} className="m-2" style={{ width: '18rem' }}>
+                                <Card key={u.id} className="m-2">
                                     <Card.Body>
                                         <Card.Title>{u.name}</Card.Title>
                                         <Card.Subtitle className="mb-2 text-muted">{u.email}</Card.Subtitle>
@@ -230,7 +230,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                 </Modal.Header>
                 <Modal.Body>
                     <UserForm
-                        user={selectedUser}
+                        targetUser={selectedUser}
                         onSuccess={handleUserSuccess}
                         isAdmin={true}
                     />

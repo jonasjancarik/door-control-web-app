@@ -134,7 +134,7 @@ const LoginForm = ({ onLogin }: { onLogin: (token: string, user: User) => void }
                             </>
                         )}
                         {emailStatus && <div className="mt-3">{emailStatus}</div>}
-                        {emailSent && email.endsWith('@gmail.com') && process.env.NEXT_SENDER_EMAIL && <a href={`https://mail.google.com/mail/u/0/#search/from%3A(${process.env.NEXT_SENDER_EMAIL})+in%3Aanywhere+newer_than%3A1h/`}>Open Gmail</a>}
+                        {emailSent && email.endsWith('@gmail.com') && process.env.NEXT_SENDER_EMAIL && <a href={`https://mail.google.com/mail/u/0/#search/from%3A(${process.env.NEXT_SENDER_EMAIL})+in%3Aanywhere+newer_than%3A1h/`} target="_blank">Open Gmail</a>}
                         {emailSent && <div className='mt-2'>Didn&apos;t receive the email? <a onClick={handleStartOver} className="text-decoration-none">
                             Try again.
                         </a></div>}

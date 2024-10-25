@@ -83,24 +83,31 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
         setError('');
         setSuccess('');
 
-        const pinValidationError = validatePin(newPin);
-        if (pinValidationError) {
-            setPinFeedback(pinValidationError);
+        // For guest users, we don't validate the PIN since it's generated server-side
+        if (user.role !== 'guest' && validatePin(newPin)) {
+            setPinFeedback(validatePin(newPin));
             return;
         }
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
-                pin: newPin,
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
+                // Only include pin for non-guest users
+                ...(user.role === 'guest' ? {} : { pin: newPin }),
                 label: newPinLabel,
                 user_id: user.id,
             }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
+            // For guest users, show the generated PIN in the success message
+            const successMessage = user.role === 'guest'
+                ? `PIN generated successfully: ${response.data.pin}`
+                : 'PIN added successfully';
+
             setNewPin('');
             setNewPinLabel('');
             setPinFeedback('');
-            setSuccess('PIN added successfully');
+            setSuccess(successMessage);
             fetchPins();
         } catch (error) {
             console.error('Failed to add PIN:', error);
@@ -137,9 +144,10 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                         type="text"
                         value={newPin}
                         onChange={handlePinChange}
-                        placeholder={`Enter ${REQUIRED_PIN_LENGTH}-digit PIN`}
+                        placeholder={user.role === 'guest' ? 'PIN will be generated automatically' : `Enter ${REQUIRED_PIN_LENGTH}-digit PIN`}
                         isInvalid={!!pinFeedback}
                         isValid={newPin.length > 0 && !pinFeedback}
+                        disabled={user.role === 'guest'}
                     />
                     <Form.Control.Feedback type="invalid">
                         {pinFeedback}

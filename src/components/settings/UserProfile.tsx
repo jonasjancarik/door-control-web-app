@@ -22,7 +22,7 @@ const UserProfile: React.FC = () => {
 
     return (
         <div>
-            <UserForm user={user} onSuccess={handleSuccess} />
+            <UserForm targetUser={user} onSuccess={handleSuccess} />
             <Button variant="danger" onClick={handleLogout} className="mt-3">
                 Logout
             </Button>
