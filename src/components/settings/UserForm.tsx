@@ -38,7 +38,9 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
     useEffect(() => {
         if (targetUser) {
             setName(targetUser.name);
-            setEmail(targetUser.email);
+            if (targetUser.email) {
+                setEmail(targetUser.email);
+            }
             setApartmentNumber(targetUser.apartment?.number || '');
             setRole(targetUser.role);
         } else if (!isAdmin) {
@@ -98,7 +100,6 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
                 />
             </Form.Group>
             <Form.Group controlId="apartmentSelect" className="mb-3">

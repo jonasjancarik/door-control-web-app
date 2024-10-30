@@ -1,7 +1,7 @@
 export interface User {
     id: number;
     name: string;
-    email: string;
+    email?: string;
     role: 'admin' | 'apartment_admin' | 'guest';
     creator_id: number;
     apartment_id: string;
