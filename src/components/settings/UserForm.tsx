@@ -15,7 +15,7 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
     const [name, setName] = useState(targetUser?.name || '');
     const [email, setEmail] = useState(targetUser?.email || '');
     const [apartmentNumber, setApartmentNumber] = useState(targetUser?.apartment?.number || user?.apartment?.number || '');
-    const [role, setRole] = useState(targetUser?.role || '');
+    const [role, setRole] = useState(targetUser?.role || 'guest');
     const [status, setStatus] = useState('');
     const [apartments, setApartments] = useState<Apartment[]>([]);
 
@@ -43,11 +43,13 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
             }
             setApartmentNumber(targetUser.apartment?.number || '');
             setRole(targetUser.role);
-        } else if (!isAdmin) {
+        } else {
             // For new users, set the apartment number to the current user's apartment
             setApartmentNumber(user?.apartment?.number || '');
+            // Set default role for new users
+            setRole('guest');
         }
-    }, [targetUser, user, isAdmin]);
+    }, [targetUser, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
