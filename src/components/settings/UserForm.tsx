@@ -3,6 +3,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { FaTrash } from 'react-icons/fa';
 
 interface UserFormProps {
     targetUser: User | null;
@@ -85,6 +86,22 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
         }
     };
 
+    const handleDeleteUser = async (user: User) => {
+        if (!confirm(`Are you sure you want to delete ${user.name}?`)) {
+            return;
+        }
+
+        try {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            onSuccess(null);
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+            setStatus('Failed to delete user');
+        }
+    };
+
     return (
         <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
@@ -140,6 +157,15 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
                         <option value="admin">Admin</option>
                     </Form.Control>
                 </Form.Group>
+            )}
+            {targetUser && (
+                <Button 
+                    variant="outline-danger" 
+                    onClick={() => handleDeleteUser(targetUser)}
+                    className="me-2"
+                >
+                    <FaTrash className="me-1" />Delete User
+                </Button>
             )}
             <Button variant="primary" type="submit">
                 {targetUser ? 'Update User' : 'Add User'}

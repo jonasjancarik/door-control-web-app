@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Alert, Card } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Card, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import PinManagement from './PinManagement';
 import RfidManagement from './RfidManagement';
@@ -23,8 +23,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
     const [modalError, setModalError] = useState('');
     const [apartments, setApartments] = useState([]);
     const [showGuestScheduleModal, setShowGuestScheduleModal] = useState(false);
-    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-    const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [success, setSuccess] = useState('');
 
     const fetchApartments = useCallback(async () => {
@@ -118,35 +116,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
         setShowGuestScheduleModal(true);
     };
 
-    const handleDeleteUser = (user: User) => {
-        setUserToDelete(user);
-        setShowDeleteConfirmation(true);
-    };
-
-    const confirmDeleteUser = async () => {
-        if (!userToDelete) return;
-
-        try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/users/${userToDelete.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setShowDeleteConfirmation(false);
-            fetchUsers();
-        } catch (error) {
-            console.error('Failed to delete user:', error);
-            if (error instanceof Error && 'response' in error) {
-                const axiosError = error as { response?: { data?: { error?: { detail?: string } } } };
-                if (axiosError.response?.data?.error?.detail) {
-                    setError(axiosError.response.data.error.detail);
-                } else {
-                    setError('Failed to delete user. Please try again.');
-                }
-            } else {
-                setError('Failed to delete user. Please try again.');
-            }
-        }
-    };
-
     const handleUserSuccess = (updatedUser: User) => {
         setShowUserModal(false);
         fetchUsers();
@@ -159,7 +128,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
             <Button variant="primary" onClick={handleAddUser} className="mb-3">
-                <FaUserPlus className="me-2" />Add New User
+                <FaUserPlus className="me-2" />Add User
             </Button>
             
             {(() => {
@@ -179,11 +148,28 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                             {users.map((u: User) => (
                                 <Card key={u.id} className="me-2 mb-2">
                                     <Card.Body>
-                                        <Card.Title>{u.name}</Card.Title>
+                                        <div className="d-flex justify-content-between align-items-start mb-2">
+                                            <Card.Title className="mb-0">{u.name}</Card.Title>
+                                            <Button 
+                                                variant="link" 
+                                                size="sm" 
+                                                onClick={() => handleEditUser(u)} 
+                                                className="p-0 text-muted"
+                                            >
+                                                <FaEdit style={{ position: 'relative', top: '-1px' }}/>
+                                            </Button>
+                                        </div>
                                         <Card.Subtitle className="mb-2 text-muted">{u.email}</Card.Subtitle>
-                                        <Card.Text>
-                                            Role: {u.role}
-                                        </Card.Text>
+                                        <div className="mb-3">
+                                            <Badge bg={
+                                                u.role === 'admin' ? 'danger' :
+                                                u.role === 'apartment_admin' ? 'primary' :
+                                                'secondary'
+                                            }>
+                                                {u.role === 'apartment_admin' ? 'Apartment Admin' : 
+                                                 u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                                            </Badge>
+                                        </div>
                                         <div className="d-flex flex-wrap">
                                             <Button variant="outline-primary" size="sm" onClick={() => handlePinManagement(u)} className="me-2 mb-2">
                                                 <FaKey className="me-1" />PINs
@@ -196,12 +182,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                                                     <FaCalendarAlt className="me-1" />Manage Schedule
                                                 </Button>
                                             )}
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteUser(u)} className="me-2 mb-2">
-                                                <FaTrash className="me-1" />Delete
-                                            </Button>
-                                            <Button variant="outline-success" size="sm" onClick={() => handleEditUser(u)} className="me-2 mb-2">
-                                                <FaEdit className="me-1" />Edit
-                                            </Button>
                                         </div>
                                     </Card.Body>
                                 </Card>
@@ -261,23 +241,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                         <p>No user selected</p>
                     )}
                 </Modal.Body>
-            </Modal>
-
-            <Modal show={showDeleteConfirmation} onHide={() => setShowDeleteConfirmation(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Confirm User Deletion</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    Are you sure you want to delete the user {userToDelete?.name}?
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteConfirmation(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="danger" onClick={confirmDeleteUser}>
-                        Delete
-                    </Button>
-                </Modal.Footer>
             </Modal>
         </div>
     );

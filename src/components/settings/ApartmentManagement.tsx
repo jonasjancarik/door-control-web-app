@@ -3,6 +3,7 @@ import { Table, Button, Modal, Form, Alert, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { FaEdit, FaBuilding, FaTrash } from 'react-icons/fa';
 
 interface ApartmentManagementProps { }
 
@@ -10,6 +11,7 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
     const { token, user } = useAuth();
     const [apartments, setApartments] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
     const [newApartment, setNewApartment] = useState({ number: '', description: '' });
     const [error, setError] = useState('');
@@ -22,15 +24,18 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
             });
             setApartments(response.data);
         } catch (error) {
-            console.error('Failed to fetch apartments:', error);
-            setError('Failed to fetch apartments. Please try again.');
+            if (axios.isAxiosError(error) && error.response?.data?.error?.detail) {
+                setError(error.response.data.error.detail);
+            } else {
+                setError('Unable to load apartments. Please check your connection and try again.');
+            }
+            console.error('Fetch apartments error:', error);
         }
     }, [token]);
 
     useEffect(() => {
         fetchApartments();
     }, [fetchApartments]);
-
 
     const handleAddApartment = () => {
         setSelectedApartment(null);
@@ -51,60 +56,123 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
 
         try {
             if (selectedApartment) {
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/apartments/${selectedApartment.id}`, newApartment, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await axios.put(
+                    `${process.env.NEXT_PUBLIC_API_URL}/apartments/${selectedApartment.id}`, 
+                    newApartment, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
                 setSuccess('Apartment updated successfully');
             } else {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/apartments`, newApartment, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await axios.post(
+                    `${process.env.NEXT_PUBLIC_API_URL}/apartments`, 
+                    newApartment, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
                 setSuccess('Apartment added successfully');
             }
             setShowModal(false);
             fetchApartments();
         } catch (error) {
-            console.error('Failed to save apartment:', error);
-            setError('Failed to save apartment. Please try again.');
+            if (axios.isAxiosError(error)) {
+                if (error.response?.data?.error?.detail) {
+                    setError(error.response.data.error.detail);
+                } else if (error.response?.status === 401) {
+                    setError('Your session has expired. Please log in again.');
+                } else if (error.response?.status === 403) {
+                    setError('You do not have permission to perform this action.');
+                } else if (!error.response) {
+                    setError('Unable to connect to the server. Please check your connection.');
+                } else {
+                    setError(`An error occurred: ${error.response.status} ${error.response.statusText}`);
+                }
+            } else {
+                setError('An unexpected error occurred. Please try again.');
+            }
+            console.error('Save apartment error:', error);
         }
     };
 
     const handleDeleteApartment = async (apartmentId: Apartment['id']) => {
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/apartments/${apartmentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_URL}/apartments/${apartmentId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             setSuccess('Apartment deleted successfully');
+            setShowDeleteModal(false);
+            setShowModal(false);
             fetchApartments();
         } catch (error) {
-            console.error('Failed to delete apartment:', error);
-            setError('Failed to delete apartment. Please try again.');
+            if (axios.isAxiosError(error)) {
+                if (error.response?.data?.error?.detail) {
+                    setError(error.response.data.error.detail);
+                } else if (error.response?.status === 401) {
+                    setError('Your session has expired. Please log in again.');
+                } else if (error.response?.status === 403) {
+                    setError('You do not have permission to delete this apartment.');
+                } else if (!error.response) {
+                    setError('Unable to connect to the server. Please check your connection.');
+                } else {
+                    setError(`Failed to delete apartment: ${error.response.status} ${error.response.statusText}`);
+                }
+            } else {
+                setError('An unexpected error occurred while deleting the apartment.');
+            }
+            console.error('Delete apartment error:', error);
         }
     };
 
     return (
         <div>
             <h3>Apartment Management</h3>
-            {error && <Alert variant="danger">{error}</Alert>}
-            {success && <Alert variant="success">{success}</Alert>}
-            <Button variant="primary" onClick={handleAddApartment} className="mb-3">Add New Apartment</Button>
+            {error && (
+                <Alert 
+                    variant="danger" 
+                    dismissible 
+                    onClose={() => setError('')}
+                    className="d-flex align-items-center"
+                >
+                    <div className="me-2">
+                        <strong>Error: </strong>
+                        {error}
+                    </div>
+                </Alert>
+            )}
+            {success && (
+                <Alert 
+                    variant="success" 
+                    dismissible 
+                    onClose={() => setSuccess('')}
+                    className="d-flex align-items-center"
+                >
+                    <div className="me-2">{success}</div>
+                </Alert>
+            )}
+            
+            <Button variant='primary' onClick={handleAddApartment} className='mb-3'>Add Apartment</Button>
+
             <div className="d-flex flex-wrap">
                 {apartments.map((apartment: Apartment) => (
                     <Card key={apartment.id} className="me-2 mb-2" style={{ width: '18rem' }}>
                         <Card.Body>
-                            <Card.Title>Apartment {apartment.number}</Card.Title>
-                            <Card.Text>
-                                {apartment.description}
-                            </Card.Text>
-                            <div className="d-flex flex-wrap">
-                                <Button variant="outline-info" size="sm" onClick={() => handleEditApartment(apartment)} className="me-2 mb-2">Edit</Button>
-                                <Button variant="outline-danger" size="sm" onClick={() => handleDeleteApartment(apartment.id)} className="me-2 mb-2">Delete</Button>
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                                <Card.Title className="mb-0">Apartment {apartment.number}</Card.Title>
+                                <Button 
+                                    variant="link" 
+                                    size="sm" 
+                                    onClick={() => handleEditApartment(apartment)} 
+                                    className="p-0 text-muted"
+                                >
+                                    <FaEdit style={{ position: 'relative', top: '-1px' }}/>
+                                </Button>
                             </div>
+                            <Card.Text>{apartment.description}</Card.Text>
                         </Card.Body>
                     </Card>
                 ))}
             </div>
 
+            {/* Edit/Add Modal */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>{selectedApartment ? 'Edit Apartment' : 'Add New Apartment'}</Modal.Title>
@@ -129,11 +197,42 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
                                 onChange={(e) => setNewApartment({ ...newApartment, description: e.target.value })}
                             />
                         </Form.Group>
+                        {selectedApartment && (
+                            <Button 
+                                variant="outline-danger" 
+                                onClick={() => setShowDeleteModal(true)}
+                                className="me-2"
+                            >
+                                <FaTrash className="me-1" />Delete Apartment
+                            </Button>
+                        )}
                         <Button variant="primary" type="submit">
                             {selectedApartment ? 'Update Apartment' : 'Add Apartment'}
                         </Button>
                     </Form>
                 </Modal.Body>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete Apartment{' '}
+                    <strong>{selectedApartment?.number}</strong>?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="danger" 
+                        onClick={() => handleDeleteApartment(selectedApartment?.id)}
+                    >
+                        Delete
+                    </Button>
+                </Modal.Footer>
             </Modal>
         </div>
     );
