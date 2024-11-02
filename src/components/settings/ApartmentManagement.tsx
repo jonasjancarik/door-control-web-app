@@ -228,7 +228,7 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
                     </Button>
                     <Button 
                         variant="danger" 
-                        onClick={() => handleDeleteApartment(selectedApartment?.id)}
+                        onClick={() => handleDeleteApartment(selectedApartment!.id)}
                     >
                         Delete
                     </Button>

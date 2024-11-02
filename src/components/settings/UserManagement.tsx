@@ -116,10 +116,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
         setShowGuestScheduleModal(true);
     };
 
-    const handleUserSuccess = (updatedUser: User) => {
+    const handleUserSuccess = (updatedUser: User | null) => {
         setShowUserModal(false);
         fetchUsers();
-        setSuccess(selectedUser ? 'User updated successfully' : 'User added successfully');
+        setSuccess(updatedUser ? 'User updated successfully' : 'User added successfully');
     };
 
     return (

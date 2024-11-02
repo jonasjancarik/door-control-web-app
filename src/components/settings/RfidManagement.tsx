@@ -242,7 +242,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
                     <Button 
                         variant="danger" 
                         onClick={() => {
-                            handleDeleteRfid(selectedRfid?.id);
+                            handleDeleteRfid(selectedRfid!.id);
                             setShowDeleteModal(false);
                         }}
                     >

@@ -7,7 +7,7 @@ import { FaTrash } from 'react-icons/fa';
 
 interface UserFormProps {
     targetUser: User | null;
-    onSuccess: (updatedUser: User) => void;
+    onSuccess: (updatedUser: User | null) => void;
     isAdmin?: boolean;
 }
 
@@ -16,7 +16,8 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
     const [name, setName] = useState(targetUser?.name || '');
     const [email, setEmail] = useState(targetUser?.email || '');
     const [apartmentNumber, setApartmentNumber] = useState(targetUser?.apartment?.number || user?.apartment?.number || '');
-    const [role, setRole] = useState(targetUser?.role || 'guest');
+    type UserRole = 'admin' | 'apartment_admin' | 'guest';
+    const [role, setRole] = useState<UserRole>(targetUser?.role || 'guest');
     const [status, setStatus] = useState('');
     const [apartments, setApartments] = useState<Apartment[]>([]);
 
@@ -148,7 +149,7 @@ const UserForm: React.FC<UserFormProps> = ({ targetUser, onSuccess, isAdmin = fa
                     <Form.Control
                         as="select"
                         value={role}
-                        onChange={(e) => setRole(e.target.value)}
+                        onChange={(e) => setRole(e.target.value as UserRole)}
                         required
                         aria-label="Select user role"
                     >

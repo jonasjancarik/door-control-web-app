@@ -260,7 +260,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                     </Button>
                     <Button 
                         variant="danger" 
-                        onClick={() => handleDeletePin(selectedPin?.id)}
+                        onClick={() => handleDeletePin(selectedPin!.id)}
                     >
                         Delete
                     </Button>
