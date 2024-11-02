@@ -7,6 +7,7 @@ import ScheduleManagement from './ScheduleManagement';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 import UserForm from './UserForm';
+import { FaKey, FaTag, FaCalendarAlt, FaTrash, FaEdit, FaUserPlus } from 'react-icons/fa';
 
 interface UserManagementProps { isActive: boolean; }
 
@@ -157,7 +158,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
             <h3>User Management</h3>
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
-            <Button variant="primary" onClick={handleAddUser} className="mb-3">Add New User</Button>
+            <Button variant="primary" onClick={handleAddUser} className="mb-3">
+                <FaUserPlus className="me-2" />Add New User
+            </Button>
             
             {(() => {
                 const usersByApartment = users.reduce((acc: { [key: string]: User[] }, user: User) => {
@@ -182,13 +185,23 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                                             Role: {u.role}
                                         </Card.Text>
                                         <div className="d-flex flex-wrap">
-                                            <Button variant="outline-primary" size="sm" onClick={() => handlePinManagement(u)} className="me-2 mb-2">Manage PINs</Button>
-                                            <Button variant="outline-secondary" size="sm" onClick={() => handleRfidManagement(u)} className="me-2 mb-2">Manage RFIDs</Button>
+                                            <Button variant="outline-primary" size="sm" onClick={() => handlePinManagement(u)} className="me-2 mb-2">
+                                                <FaKey className="me-1" />PINs
+                                            </Button>
+                                            <Button variant="outline-secondary" size="sm" onClick={() => handleRfidManagement(u)} className="me-2 mb-2">
+                                                <FaTag className="me-1" />Fobs
+                                            </Button>
                                             {u.role === 'guest' && (
-                                                <Button variant="outline-info" size="sm" onClick={() => handleGuestScheduleManagement(u)} className="me-2 mb-2">Manage Schedule</Button>
+                                                <Button variant="outline-info" size="sm" onClick={() => handleGuestScheduleManagement(u)} className="me-2 mb-2">
+                                                    <FaCalendarAlt className="me-1" />Manage Schedule
+                                                </Button>
                                             )}
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteUser(u)} className="me-2 mb-2">Delete</Button>
-                                            <Button variant="outline-success" size="sm" onClick={() => handleEditUser(u)} className="me-2 mb-2">Edit</Button>
+                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteUser(u)} className="me-2 mb-2">
+                                                <FaTrash className="me-1" />Delete
+                                            </Button>
+                                            <Button variant="outline-success" size="sm" onClick={() => handleEditUser(u)} className="me-2 mb-2">
+                                                <FaEdit className="me-1" />Edit
+                                            </Button>
                                         </div>
                                     </Card.Body>
                                 </Card>
@@ -200,7 +213,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
 
             <Modal show={showPinModal} onHide={() => setShowPinModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Manage PINs for {selectedUser?.name}</Modal.Title>
+                    <Modal.Title>PINs - {selectedUser?.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (
@@ -213,7 +226,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
 
             <Modal show={showRfidModal} onHide={() => setShowRfidModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Manage RFID for {selectedUser?.name}</Modal.Title>
+                    <Modal.Title>Key fobs - {selectedUser?.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (

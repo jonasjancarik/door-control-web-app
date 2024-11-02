@@ -3,6 +3,7 @@ import { Table, Button, Form, Alert, Modal, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { User, PIN } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { MdAdd } from 'react-icons/md';
 
 interface PinManagementProps {
     user: User;
@@ -137,13 +138,19 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
             {success && <Alert variant="success" onClose={() => setSuccess('')} dismissible>{success}</Alert>}
 
             {/* Header Section */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="m-0">PINs for {user.name}</h4>
+            <div className="d-flex justify-content-end align-items-center mb-4">
                 <Button 
-                    variant="primary" 
+                    variant="light"
+                    className="border-0 d-flex align-items-center gap-2 shadow-sm hover-lift"
+                    style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        backdropFilter: 'blur(8px)',
+                        transition: 'all 0.2s ease-in-out'
+                    }}
                     onClick={() => setShowAddModal(true)}
                 >
-                    Add New PIN
+                    <MdAdd size={20} />
+                    <span>Add PIN</span>
                 </Button>
             </div>
 
