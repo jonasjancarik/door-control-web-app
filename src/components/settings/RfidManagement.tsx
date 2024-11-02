@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import { Table, Button, Form, Modal, Toast, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { User, RFID } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,12 +10,18 @@ interface RfidManagementProps {
 
 const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
     const { token } = useAuth();
-    const [rfidTags, setRfidTags] = useState([]);
+    const [rfidTags, setRfidTags] = useState<RFID[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedRfid, setSelectedRfid] = useState<RFID | null>(null);
+    
     const [newRfidUuid, setNewRfidUuid] = useState('');
     const [newRfidLabel, setNewRfidLabel] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [isReading, setIsReading] = useState(false);
+    
+    const [toast, setToast] = useState({ show: false, message: '', variant: 'success' });
 
     const fetchRfidTags = useCallback(async () => {
         try {
@@ -25,7 +31,9 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
             setRfidTags(response.data);
         } catch (error) {
             console.error('Failed to fetch RFID tags:', error);
-            setError('Failed to fetch RFID tags. Please try again.');
+            setToast({ show: true, message: 'Failed to fetch RFID tags', variant: 'danger' });
+        } finally {
+            setIsLoading(false);
         }
     }, [user.id, token]);
 
@@ -36,6 +44,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
     const handleAddRfid = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setIsLoading(true);
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/rfids`, {
                 uuid: newRfidUuid,
                 label: newRfidLabel,
@@ -43,13 +52,16 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
             }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            
+            setToast({ show: true, message: 'RFID tag added successfully', variant: 'success' });
+            setShowAddModal(false);
             setNewRfidUuid('');
             setNewRfidLabel('');
-            setSuccess('RFID tag added successfully');
-            fetchRfidTags();
+            await fetchRfidTags();
         } catch (error) {
-            console.error('Failed to add RFID tag:', error);
-            setError('Failed to add RFID tag. Please try again.');
+            setToast({ show: true, message: 'Failed to add RFID tag', variant: 'danger' });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -58,91 +70,178 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/rfids/${rfidId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setSuccess('RFID tag deleted successfully');
-            fetchRfidTags();
+            setToast({ show: true, message: 'RFID tag deleted successfully', variant: 'success' });
+            await fetchRfidTags();
         } catch (error) {
             console.error('Failed to delete RFID tag:', error);
-            setError('Failed to delete RFID tag. Please try again.');
+            setToast({ show: true, message: 'Failed to delete RFID tag', variant: 'danger' });
         }
     };
 
     const handleReadRfid = async () => {
         setIsReading(true);
-        setError('');
-        setSuccess('');
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/rfids/read`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { timeout: 30 },
             });
             setNewRfidUuid(response.data.uuid);
-            setSuccess('RFID tag read successfully');
+            setToast({ show: true, message: 'RFID tag read successfully', variant: 'success' });
         } catch (error) {
             console.error('Failed to read RFID tag:', error);
-            setError('Failed to read RFID tag. Please try again.');
+            setToast({ show: true, message: 'Failed to read RFID tag', variant: 'danger' });
         } finally {
             setIsReading(false);
         }
     };
 
     return (
-        <div>
-            <h4>RFID Tags for {user.name}</h4>
-            {error && <Alert variant="danger">{error}</Alert>}
-            {success && <Alert variant="success">{success}</Alert>}
-            <Form className="mb-3" onSubmit={handleAddRfid}>
-                <Form.Group className="mb-2">
-                    <Form.Label>New RFID UUID</Form.Label>
-                    <div className="d-flex">
-                        <Form.Control
-                            type="text"
-                            value={newRfidUuid}
-                            onChange={(e) => setNewRfidUuid(e.target.value)}
-                            placeholder="Enter RFID UUID"
-                        />
-                        <Button 
-                            variant="secondary" 
-                            onClick={handleReadRfid} 
-                            disabled={isReading}
-                            className="ms-2"
-                        >
-                            {isReading ? <Spinner animation="border" size="sm" /> : 'Read RFID'}
-                        </Button>
-                    </div>
-                </Form.Group>
-                <Form.Group className="mb-2">
-                    <Form.Label>RFID Label</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={newRfidLabel}
-                        onChange={(e) => setNewRfidLabel(e.target.value)}
-                        placeholder="Enter RFID label"
-                    />
-                </Form.Group>
-                <Button variant="primary" type="submit">Add RFID Tag</Button>
-            </Form>
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Last Four Digits</th>
-                        <th>Label</th>
-                        <th>Created At</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rfidTags.map((rfid: RFID) => (
-                        <tr key={rfid.id}>
-                            <td>...{rfid.last_four_digits}</td>
-                            <td>{rfid.label}</td>
-                            <td>{new Date(rfid.created_at).toLocaleString()}</td>
-                            <td>
-                                <Button variant="danger" onClick={() => handleDeleteRfid(rfid.id)}>Delete</Button>
-                            </td>
+        <div className="position-relative">
+            <Toast 
+                show={toast.show} 
+                onClose={() => setToast({ ...toast, show: false })}
+                delay={3000}
+                autohide
+                className="position-absolute top-0 end-0"
+            >
+                <Toast.Header>
+                    <strong className="me-auto">{toast.variant === 'success' ? 'Success' : 'Error'}</strong>
+                </Toast.Header>
+                <Toast.Body>{toast.message}</Toast.Body>
+            </Toast>
+
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h4 className="m-0">RFID Tags for {user.name}</h4>
+                <Button 
+                    variant="primary" 
+                    onClick={() => setShowAddModal(true)}
+                >
+                    Add New RFID Tag
+                </Button>
+            </div>
+
+            {isLoading ? (
+                <div className="text-center py-5">
+                    <Spinner animation="border" />
+                </div>
+            ) : (
+                <Table responsive hover className="shadow-sm">
+                    <thead className="bg-light">
+                        <tr>
+                            <th>Last Four Digits</th>
+                            <th>Label</th>
+                            <th>Created At</th>
+                            <th className="text-end">Action</th>
                         </tr>
-                    ))}
-                </tbody>
-            </Table>
+                    </thead>
+                    <tbody>
+                        {rfidTags.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className="text-center py-4 text-muted">
+                                    No RFID tags found
+                                </td>
+                            </tr>
+                        ) : (
+                            rfidTags.map((rfid) => (
+                                <tr key={rfid.id}>
+                                    <td>...{rfid.last_four_digits}</td>
+                                    <td>{rfid.label}</td>
+                                    <td>{new Date(rfid.created_at).toLocaleDateString()}</td>
+                                    <td className="text-end">
+                                        <Button 
+                                            variant="outline-danger" 
+                                            size="sm"
+                                            onClick={() => {
+                                                setSelectedRfid(rfid);
+                                                setShowDeleteModal(true);
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </Table>
+            )}
+
+            <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add New RFID Tag</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleAddRfid}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>RFID UUID</Form.Label>
+                            <div className="d-flex gap-2">
+                                <Form.Control
+                                    type="text"
+                                    value={newRfidUuid}
+                                    onChange={(e) => setNewRfidUuid(e.target.value)}
+                                    placeholder="Enter or read RFID UUID"
+                                />
+                                <Button 
+                                    variant="secondary" 
+                                    onClick={handleReadRfid} 
+                                    disabled={isReading}
+                                >
+                                    {isReading ? (
+                                        <Spinner animation="border" size="sm" />
+                                    ) : (
+                                        'Read'
+                                    )}
+                                </Button>
+                            </div>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Label</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newRfidLabel}
+                                onChange={(e) => setNewRfidLabel(e.target.value)}
+                                placeholder="Enter a descriptive label"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={handleAddRfid}
+                        disabled={!newRfidUuid || !newRfidLabel}
+                    >
+                        Add RFID Tag
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete the RFID tag{' '}
+                    <strong>{selectedRfid?.label}</strong>?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="danger" 
+                        onClick={() => {
+                            handleDeleteRfid(selectedRfid?.id);
+                            setShowDeleteModal(false);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

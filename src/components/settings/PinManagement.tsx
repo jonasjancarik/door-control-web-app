@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Form, Alert, Modal, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { User, PIN } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,11 +11,11 @@ interface PinManagementProps {
 const commonPins = [
     '1234', '0000', '7777', '2000', '2222', '9999', '5555', '1122', '8888', '2001',
     '1111', '1212', '1004', '4444', '6969', '3333', '6666', '1313', '4321', '1010'
-];  // according to https://informationisbeautiful.net/visualizations/most-common-pin-codes/
+];
 
 const REQUIRED_PIN_LENGTH = parseInt(process.env.NEXT_PUBLIC_REQUIRED_PIN_LENGTH || '4');
 
-const unsafePinPatterns = [  // todo: use files from https://github.com/Slon104/Common-PIN-Analysis-from-haveibeenpwned.com
+const unsafePinPatterns = [
     { regex: new RegExp(`^(${commonPins.join('|')})$`), reason: 'commonly used PIN' },
     { regex: /^(0123|1234|2345|3456|4567|5678|6789|7890)$/, reason: 'consecutive numbers' },
     { regex: /^(9876|8765|7654|6543|5432|4321|3210)$/, reason: 'reverse consecutive numbers' },
@@ -40,8 +40,10 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
     const [newPinLabel, setNewPinLabel] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [pinError, setPinError] = useState('');
     const [pinFeedback, setPinFeedback] = useState('');
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedPin, setSelectedPin] = useState<PIN | null>(null);
 
     const fetchPins = useCallback(async () => {
         try {
@@ -57,7 +59,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
 
     useEffect(() => {
         fetchPins();
-    }, [user, fetchPins]);
+    }, [fetchPins]);
 
     const validatePin = (pin: string) => {
         if (pin.length !== REQUIRED_PIN_LENGTH) {
@@ -80,10 +82,6 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
 
     const handleAddPin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
-
-        // For guest users, we don't validate the PIN since it's generated server-side
         if (user.role !== 'guest' && validatePin(newPin)) {
             setPinFeedback(validatePin(newPin));
             return;
@@ -91,7 +89,6 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pins`, {
-                // Only include pin for non-guest users
                 ...(user.role === 'guest' ? {} : { pin: newPin }),
                 label: newPinLabel,
                 user_id: user.id,
@@ -99,7 +96,6 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            // For guest users, show the generated PIN in the success message
             const successMessage = user.role === 'guest'
                 ? `PIN generated successfully: ${response.data.pin}`
                 : 'PIN added successfully';
@@ -108,6 +104,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
             setNewPinLabel('');
             setPinFeedback('');
             setSuccess(successMessage);
+            setShowAddModal(false);
             fetchPins();
         } catch (error) {
             console.error('Failed to add PIN:', error);
@@ -121,6 +118,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSuccess('PIN deleted successfully');
+            setShowDeleteModal(false);
             fetchPins();
         } catch (error) {
             console.error('Failed to delete PIN:', error);
@@ -133,62 +131,134 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
     };
 
     return (
-        <div>
-            <h4>PINs for {user.name}</h4>
-            {error && <Alert variant="danger">{error}</Alert>}
-            {success && <Alert variant="success">{success}</Alert>}
-            <Form className="mb-3" onSubmit={handleAddPin}>
-                <Form.Group className="mb-2">
-                    <Form.Label>New PIN</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={newPin}
-                        onChange={handlePinChange}
-                        placeholder={user.role === 'guest' ? 'PIN will be generated automatically' : `Enter ${REQUIRED_PIN_LENGTH}-digit PIN`}
-                        isInvalid={!!pinFeedback}
-                        isValid={newPin.length > 0 && !pinFeedback}
-                        disabled={user.role === 'guest'}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                        {pinFeedback}
-                    </Form.Control.Feedback>
-                    <Form.Control.Feedback type="valid">
-                        PIN is valid
-                    </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group className="mb-2">
-                    <Form.Label>PIN Label</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={newPinLabel}
-                        onChange={(e) => setNewPinLabel(e.target.value)}
-                        placeholder="Enter PIN label"
-                    />
-                </Form.Group>
-                <Button variant="primary" type="submit">Add PIN</Button>
-            </Form>
-            <Table striped bordered hover>
-                <thead>
+        <div className="position-relative">
+            {/* Toast Notifications */}
+            {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
+            {success && <Alert variant="success" onClose={() => setSuccess('')} dismissible>{success}</Alert>}
+
+            {/* Header Section */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h4 className="m-0">PINs for {user.name}</h4>
+                <Button 
+                    variant="primary" 
+                    onClick={() => setShowAddModal(true)}
+                >
+                    Add New PIN
+                </Button>
+            </div>
+
+            {/* PINs Table */}
+            <Table responsive hover className="shadow-sm">
+                <thead className="bg-light">
                     <tr>
                         <th>PIN</th>
                         <th>Label</th>
                         <th>Created At</th>
-                        <th>Action</th>
+                        <th className="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {pins.map((pin: PIN) => (
-                        <tr key={pin.id}>
-                            <td>****</td>
-                            <td>{pin.label}</td>
-                            <td>{new Date(pin.created_at).toLocaleString()}</td>
-                            <td>
-                                <Button variant="danger" onClick={() => handleDeletePin(pin.id)}>Delete</Button>
+                    {pins.length === 0 ? (
+                        <tr>
+                            <td colSpan={4} className="text-center py-4 text-muted">
+                                No PINs found
                             </td>
                         </tr>
-                    ))}
+                    ) : (
+                        pins.map((pin: PIN) => (
+                            <tr key={pin.id}>
+                                <td>****</td>
+                                <td>{pin.label}</td>
+                                <td>{new Date(pin.created_at).toLocaleDateString()}</td>
+                                <td className="text-end">
+                                    <Button 
+                                        variant="outline-danger" 
+                                        size="sm"
+                                        onClick={() => {
+                                            setSelectedPin(pin);
+                                            setShowDeleteModal(true);
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </Table>
+
+            {/* Add PIN Modal */}
+            <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add New PIN</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleAddPin}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>PIN</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newPin}
+                                onChange={handlePinChange}
+                                placeholder={user.role === 'guest' ? 'PIN will be generated automatically' : `Enter ${REQUIRED_PIN_LENGTH}-digit PIN`}
+                                isInvalid={!!pinFeedback}
+                                isValid={newPin.length > 0 && !pinFeedback}
+                                disabled={user.role === 'guest'}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                {pinFeedback}
+                            </Form.Control.Feedback>
+                            <Form.Control.Feedback type="valid">
+                                PIN is valid
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Label</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newPinLabel}
+                                onChange={(e) => setNewPinLabel(e.target.value)}
+                                placeholder="Enter a descriptive label"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={handleAddPin}
+                        disabled={!newPinLabel || (user.role !== 'guest' && (!newPin || !!pinFeedback))}
+                    >
+                        Add PIN
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete the PIN{' '}
+                    <strong>{selectedPin?.label}</strong>?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="danger" 
+                        onClick={() => handleDeletePin(selectedPin?.id)}
+                    >
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

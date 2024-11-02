@@ -90,7 +90,7 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
             <Button variant="primary" onClick={handleAddApartment} className="mb-3">Add New Apartment</Button>
             <div className="d-flex flex-wrap">
                 {apartments.map((apartment: Apartment) => (
-                    <Card key={apartment.id} className="m-2" style={{ width: '18rem' }}>
+                    <Card key={apartment.id} className="me-2 mb-2" style={{ width: '18rem' }}>
                         <Card.Body>
                             <Card.Title>Apartment {apartment.number}</Card.Title>
                             <Card.Text>

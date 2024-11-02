@@ -22,11 +22,11 @@ const Settings = () => {
                         <Tab eventKey="profile" title="Profile">
                             <UserProfile />
                         </Tab>
-                        <Tab eventKey="users" title="User Management">
+                        <Tab eventKey="users" title="Users">
                             <UserManagement isActive={activeTab === 'users'} />
                         </Tab>
                         {user && user.role === 'admin' && (
-                            <Tab eventKey="apartments" title="Apartment Management">
+                            <Tab eventKey="apartments" title="Apartments">
                                 <ApartmentManagement />
                             </Tab>
                         )}

@@ -172,9 +172,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                 return Object.entries(usersByApartment).map(([apartmentNumber, users]) => (
                     <div key={apartmentNumber}>
                         <h4>Apartment {apartmentNumber}</h4>
-                        <div className="d-flex flex-wrap">
+                        <div className="d-flex flex-wrap mb-3">
                             {users.map((u: User) => (
-                                <Card key={u.id} className="m-2">
+                                <Card key={u.id} className="me-2 mb-2">
                                     <Card.Body>
                                         <Card.Title>{u.name}</Card.Title>
                                         <Card.Subtitle className="mb-2 text-muted">{u.email}</Card.Subtitle>
