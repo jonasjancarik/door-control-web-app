@@ -124,7 +124,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
                     onClick={() => setShowAddModal(true)}
                 >
                     <MdAdd size={20} />
-                    <span>Add PIN</span>
+                    <span>Add fob</span>
                 </Button>
             </div>
 
@@ -176,7 +176,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
 
             <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add New RFID Tag</Modal.Title>
+                    <Modal.Title>Add new fob</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleAddRfid}>
@@ -220,7 +220,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
                     <Button 
                         variant="primary" 
                         onClick={handleAddRfid}
-                        disabled={!newRfidUuid || !newRfidLabel}
+                        disabled={!newRfidUuid}
                     >
                         Add RFID Tag
                     </Button>

@@ -238,7 +238,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                     <Button 
                         variant="primary" 
                         onClick={handleAddPin}
-                        disabled={!newPinLabel || (user.role !== 'guest' && (!newPin || !!pinFeedback))}
+                        disabled={user.role !== 'guest' && (!newPin || !!pinFeedback)}
                     >
                         Add PIN
                     </Button>

@@ -146,7 +146,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                         <h4>Apartment {apartmentNumber}</h4>
                         <div className="d-flex flex-wrap mb-3">
                             {users.map((u: User) => (
-                                <Card key={u.id} className="me-2 mb-2">
+                                <Card key={u.id} className="me-2 mb-2 flex-grow-1 flex-sm-grow-0" style={{ minWidth: '280px' }}>
                                     <Card.Body>
                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                             <Card.Title className="mb-0">{u.name}</Card.Title>

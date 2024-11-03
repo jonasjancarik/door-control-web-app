@@ -224,7 +224,7 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-                        Cancel
+                        Cancel  
                     </Button>
                     <Button 
                         variant="danger" 
