@@ -179,7 +179,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                                             </Button>
                                             {u.role === 'guest' && (
                                                 <Button variant="outline-info" size="sm" onClick={() => handleGuestScheduleManagement(u)} className="me-2 mb-2">
-                                                    <FaCalendarAlt className="me-1" />Manage Schedule
+                                                    <FaCalendarAlt className="me-1" />Schedule
                                                 </Button>
                                             )}
                                         </div>
@@ -232,7 +232,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
 
             <Modal show={showGuestScheduleModal} onHide={() => setShowGuestScheduleModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>Manage Guest Schedule for {selectedUser?.name}</Modal.Title>
+                    <Modal.Title>Schedule - {selectedUser?.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {selectedUser ? (
