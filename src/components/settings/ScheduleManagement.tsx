@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Form, Alert, Tabs, Tab, InputGroup } from 'react-bootstrap';
+import { Table, Button, Form, Alert, Tabs, Tab, InputGroup, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { User, RecurringSchedule, OneTimeAccess } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { MdAdd } from 'react-icons/md';
 
 interface GuestScheduleManagementProps {
     user: User;
@@ -26,6 +27,11 @@ const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user }) =>
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [endDateManuallySet, setEndDateManuallySet] = useState(false);
+    const [showAddRecurringModal, setShowAddRecurringModal] = useState(false);
+    const [showAddOneTimeModal, setShowAddOneTimeModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
+    const [scheduleType, setScheduleType] = useState<'recurring' | 'onetime'>('recurring');
 
     const fetchSchedules = useCallback(async () => {
         try {
@@ -146,12 +152,141 @@ const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user }) =>
     };
 
     return (
-        <div>
-            {error && <Alert variant="danger">{error}</Alert>}
-            {success && <Alert variant="success">{success}</Alert>}
+        <div className="position-relative">
+            {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
+            {success && <Alert variant="success" onClose={() => setSuccess('')} dismissible>{success}</Alert>}
+
             <Tabs defaultActiveKey="recurring" id="guest-schedule-tabs">
                 <Tab eventKey="recurring" title="Recurring Schedule">
-                    <Form onSubmit={handleAddRecurringSchedule} className="my-3">
+                    {/* Header Section */}
+                    <div className="d-flex justify-content-end align-items-center mt-3 mb-4">
+                        <Button 
+                            variant="light"
+                            className="border-0 d-flex align-items-center gap-2 shadow-sm hover-lift"
+                            style={{ 
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                backdropFilter: 'blur(8px)',
+                                transition: 'all 0.2s ease-in-out'
+                            }}
+                            onClick={() => setShowAddRecurringModal(true)}
+                        >
+                            <MdAdd size={20} />
+                            <span>Add Schedule</span>
+                        </Button>
+                    </div>
+
+                    <Table responsive hover className="shadow-sm">
+                        <thead className="bg-light">
+                            <tr>
+                                <th>Day of Week</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th className="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recurringSchedules.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-4 text-muted">
+                                        No recurring schedules found
+                                    </td>
+                                </tr>
+                            ) : (
+                                recurringSchedules.map((schedule: RecurringSchedule) => (
+                                    <tr key={schedule.id}>
+                                        <td>{daysOfWeek[schedule.day_of_week]}</td>
+                                        <td>{formatTime(schedule.start_time)}</td>
+                                        <td>{formatTime(schedule.end_time)}</td>
+                                        <td className="text-end">
+                                            <Button 
+                                                variant="outline-danger" 
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedSchedule(schedule);
+                                                    setScheduleType('recurring');
+                                                    setShowDeleteModal(true);
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </Table>
+                </Tab>
+
+                <Tab eventKey="oneTime" title="One-Time Access">
+                    {/* Similar header section for one-time access */}
+                    <div className="d-flex justify-content-end align-items-center mt-3 mb-4">
+                        <Button 
+                            variant="light"
+                            className="border-0 d-flex align-items-center gap-2 shadow-sm hover-lift"
+                            style={{ 
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                backdropFilter: 'blur(8px)',
+                                transition: 'all 0.2s ease-in-out'
+                            }}
+                            onClick={() => setShowAddOneTimeModal(true)}
+                        >
+                            <MdAdd size={20} />
+                            <span>Add Access</span>
+                        </Button>
+                    </div>
+
+                    <Table responsive hover className="shadow-sm">
+                        <thead className="bg-light">
+                            <tr>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th className="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {oneTimeAccess.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="text-center py-4 text-muted">
+                                        No one-time access found
+                                    </td>
+                                </tr>
+                            ) : (
+                                oneTimeAccess.map((access: OneTimeAccess) => (
+                                    <tr key={access.id}>
+                                        <td>{access.start_date}</td>
+                                        <td>{access.end_date}</td>
+                                        <td>{formatTime(access.start_time)}</td>
+                                        <td>{formatTime(access.end_time)}</td>
+                                        <td className="text-end">
+                                            <Button 
+                                                variant="outline-danger" 
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedSchedule(access);
+                                                    setScheduleType('onetime');
+                                                    setShowDeleteModal(true);
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </Table>
+                </Tab>
+            </Tabs>
+
+            {/* Add Recurring Schedule Modal */}
+            <Modal show={showAddRecurringModal} onHide={() => setShowAddRecurringModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add Recurring Schedule</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleAddRecurringSchedule}>
                         <InputGroup className="mb-3">
                             <InputGroup.Text>Day of Week</InputGroup.Text>
                             <Form.Select
@@ -181,34 +316,25 @@ const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user }) =>
                                 aria-label="End Time"
                             />
                         </InputGroup>
-
-                        <Button type="submit" className="mt-2">Add Recurring Schedule</Button>
                     </Form>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Day of Week</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {recurringSchedules.map((schedule: RecurringSchedule) => (
-                                <tr key={schedule.id}>
-                                    <td>{daysOfWeek[schedule.day_of_week]}</td>
-                                    <td>{formatTime(schedule.start_time)}</td>
-                                    <td>{formatTime(schedule.end_time)}</td>
-                                    <td>
-                                        <Button variant="danger" onClick={() => handleRemoveRecurringSchedule(schedule.id)}>Remove</Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                </Tab>
-                <Tab eventKey="oneTime" title="One-Time Access">
-                    <Form onSubmit={handleAddOneTimeAccess} className="my-3">
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAddRecurringModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleAddRecurringSchedule}>
+                        Add Schedule
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Add One-Time Access Modal */}
+            <Modal show={showAddOneTimeModal} onHide={() => setShowAddOneTimeModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add One-Time Access</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleAddOneTimeAccess}>
                         <InputGroup className="mb-3">
                             <InputGroup.Text>Date</InputGroup.Text>
                             <Form.Control
@@ -242,41 +368,49 @@ const ScheduleManagement: React.FC<GuestScheduleManagementProps> = ({ user }) =>
                                 aria-label="End Time"
                             />
                         </InputGroup>
-
-                        <Button 
-                            type="submit" 
-                            className="mt-2" 
-                            disabled={!newOneTimeAccess.start_date || !newOneTimeAccess.end_date}
-                        >
-                            Add One-Time Access
-                        </Button>
                     </Form>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {oneTimeAccess.map((access: OneTimeAccess) => (
-                                <tr key={access.id}>
-                                    <td>{access.start_date}</td>
-                                    <td>{access.end_date}</td>
-                                    <td>{formatTime(access.start_time)}</td>
-                                    <td>{formatTime(access.end_time)}</td>
-                                    <td>
-                                        <Button variant="danger" onClick={() => handleRemoveOneTimeAccess(access.id)}>Remove</Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                </Tab>
-            </Tabs>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAddOneTimeModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={handleAddOneTimeAccess}
+                        disabled={!newOneTimeAccess.start_date || !newOneTimeAccess.end_date}
+                    >
+                        Add Access
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete this {scheduleType === 'recurring' ? 'schedule' : 'access'}?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="danger" 
+                        onClick={() => {
+                            if (scheduleType === 'recurring') {
+                                handleRemoveRecurringSchedule(selectedSchedule.id);
+                            } else {
+                                handleRemoveOneTimeAccess(selectedSchedule.id);
+                            }
+                            setShowDeleteModal(false);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
