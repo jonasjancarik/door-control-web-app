@@ -37,7 +37,8 @@ export interface RecurringSchedule {
 export interface OneTimeAccess {
     id: number;
     user_id: number;
-    access_date: string;
+    start_date: string;
+    end_date: string;
     start_time: string;
     end_time: string;
 }
