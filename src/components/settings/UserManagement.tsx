@@ -224,7 +224,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                     <UserForm
                         targetUser={selectedUser}
                         onSuccess={handleUserSuccess}
-                        isAdmin={true}
                     />
                 </Modal.Body>
             </Modal>
