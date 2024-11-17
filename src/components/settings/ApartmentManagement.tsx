@@ -148,7 +148,9 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
                 </Alert>
             )}
             
-            <Button variant='primary' onClick={handleAddApartment} className='mb-3'>Add Apartment</Button>
+            <Button variant='primary' onClick={handleAddApartment} className='mb-3'>
+                <FaBuilding className="me-2" />Add Apartment
+            </Button>
 
             <div className="d-flex flex-wrap">
                 {apartments.map((apartment: Apartment) => (

@@ -149,7 +149,7 @@ const ApiKeyManagement: React.FC = () => {
                     {newlyCreatedKey ? (
                         <div>
                             <Alert variant="warning">
-                                <strong>Important:</strong> Copy your API key now. You won't be able to see it again!
+                                <strong>Important:</strong> Copy your API key now. You won&apos;t be able to see it again!
                             </Alert>
                             <Form.Group>
                                 <Form.Control
