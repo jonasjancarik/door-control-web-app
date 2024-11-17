@@ -49,3 +49,12 @@ export interface Apartment {
     description: string;
     users: User[];
 }
+
+export interface ApiKey {
+    key_suffix: string;
+    description: string;
+    created_at: string;
+    is_active: boolean;
+    user_id: number;
+    api_key?: string; // Only present when creating a new key
+}
