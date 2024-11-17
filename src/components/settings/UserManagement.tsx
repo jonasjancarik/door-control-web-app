@@ -124,7 +124,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
 
     return (
         <div>
-            <h3>User Management</h3>
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
             <Button variant="primary" onClick={handleAddUser} className="mb-3">

@@ -124,7 +124,6 @@ const ApartmentManagement: React.FC<ApartmentManagementProps> = () => {
 
     return (
         <div>
-            <h3>Apartment Management</h3>
             {error && (
                 <Alert 
                     variant="danger" 
