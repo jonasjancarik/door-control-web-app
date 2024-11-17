@@ -176,7 +176,7 @@ const PinManagement: React.FC<PinManagementProps> = ({ user }) => {
                             <tr key={pin.id}>
                                 <td>****</td>
                                 <td>{pin.label}</td>
-                                <td>{new Date(pin.created_at).toLocaleDateString()}</td>
+                                <td>{new Date(pin.created_at).toLocaleDateString(window.navigator.language)}</td>
                                 <td className="text-end">
                                     <Button 
                                         variant="outline-danger" 

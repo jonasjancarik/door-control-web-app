@@ -154,7 +154,7 @@ const RfidManagement: React.FC<RfidManagementProps> = ({ user }) => {
                                 <tr key={rfid.id}>
                                     <td>...{rfid.last_four_digits}</td>
                                     <td>{rfid.label}</td>
-                                    <td>{new Date(rfid.created_at).toLocaleDateString()}</td>
+                                    <td>{new Date(rfid.created_at).toLocaleDateString(window.navigator.language)}</td>
                                     <td className="text-end">
                                         <Button 
                                             variant="outline-danger" 
