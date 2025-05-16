@@ -5,6 +5,7 @@ export interface User {
     role: 'admin' | 'apartment_admin' | 'guest';
     creator_id: number;
     apartment_id: string;
+    is_active: boolean;
     apartment: Apartment;
     recurring_schedules?: RecurringSchedule[];
     one_time_access?: OneTimeAccess[];

@@ -7,13 +7,13 @@ import ScheduleManagement from './ScheduleManagement';
 import { User, Apartment } from '@/types/types';
 import { useAuth } from '@/contexts/AuthContext';
 import UserForm from './UserForm';
-import { FaKey, FaTag, FaCalendarAlt, FaTrash, FaEdit, FaUserPlus } from 'react-icons/fa';
+import { FaKey, FaTag, FaCalendarAlt, FaTrash, FaEdit, FaUserPlus, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 
 interface UserManagementProps { isActive: boolean; }
 
-const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
-    const { token, user } = useAuth();
-    const [users, setUsers] = useState([]);
+const UserManagement: React.FC<UserManagementProps> = ({ isActive }): JSX.Element => {
+    const { token, user: currentUser } = useAuth();
+    const [users, setUsers] = useState<User[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showPinModal, setShowPinModal] = useState(false);
     const [showRfidModal, setShowRfidModal] = useState(false);
@@ -42,7 +42,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            let usersData = user?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment?.number === user?.apartment?.number);
+            let usersData = currentUser?.role === 'admin' ? response.data : response.data.filter((u: User) => u.apartment?.number === currentUser?.apartment?.number);
             
             // Sort users by apartment number (numerically if possible) and then by name
             usersData.sort((a: User, b: User) => {
@@ -66,9 +66,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
         } catch (error) {
             console.error('Failed to fetch users:', error);
             if (error instanceof Error && 'response' in error) {
-                const axiosError = error as { response?: { data?: { error?: { detail?: string } } } };
-                if (axiosError.response?.data?.error?.detail) {
-                    setError(axiosError.response.data.error.detail);
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                if (axiosError.response?.data?.detail) {
+                    setError(axiosError.response.data.detail);
                 } else {
                     setError('Failed to fetch users. Please try again.');
                 }
@@ -76,7 +76,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                 setError('Failed to fetch users. Please try again.');
             }
         }
-    }, [token, user?.role, user?.apartment?.number]);
+    }, [token, currentUser?.role, currentUser?.apartment?.number]);
 
     useEffect(() => {
         fetchApartments();
@@ -86,8 +86,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
     useEffect(() => {
         if (isActive) {
             fetchUsers();
+            fetchApartments();
         }
-    }, [isActive, fetchUsers]);
+    }, [isActive, fetchUsers, fetchApartments]);
 
     const handlePinManagement = (user: User) => {
         setSelectedUser(user);
@@ -122,6 +123,34 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
         setSuccess(updatedUser ? 'User updated successfully' : 'User added successfully');
     };
 
+    const handleToggleUserStatus = async (userId: number, currentIsActive: boolean) => {
+        setError('');
+        setSuccess('');
+        try {
+            await axios.put(
+                `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`,
+                { is_active: !currentIsActive },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            setUsers((prevUsers): User[] =>
+                prevUsers.map((u: User): User =>
+                    u.id === userId ? { ...u, is_active: !currentIsActive } : u
+                )
+            );
+            setSuccess(`User ${!currentIsActive ? 'activated' : 'deactivated'} successfully.`);
+        } catch (error) {
+            console.error('Failed to update user status:', error);
+            if (error instanceof Error && 'response' in error) {
+                const axiosError = error as { response?: { data?: { detail?: string } } };
+                setError(axiosError.response?.data?.detail || 'Failed to update user status.');
+            } else {
+                setError('Failed to update user status. An unknown error occurred.');
+            }
+        }
+    };
+
     return (
         <div>
             {error && <Alert variant="danger">{error}</Alert>}
@@ -145,10 +174,28 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                         <h4>Apartment {apartmentNumber}</h4>
                         <div className="d-flex flex-wrap mb-3">
                             {users.map((u: User) => (
-                                <Card key={u.id} className="me-2 mb-2 flex-grow-1 flex-sm-grow-0" style={{ minWidth: '280px' }}>
+                                <Card 
+                                    key={u.id} 
+                                    className="me-2 mb-2 flex-grow-1 flex-sm-grow-0" 
+                                    style={{
+                                        minWidth: '280px', 
+                                        opacity: u.is_active ? 1 : 0.6, 
+                                        transition: 'opacity 0.3s ease-in-out' 
+                                    } as React.CSSProperties}
+                                >
                                     <Card.Body>
-                                        <div className="d-flex justify-content-between align-items-start mb-2">
-                                            <Card.Title className="mb-0">{u.name}</Card.Title>
+                                        <div className="d-flex justify-content-between align-items-center mb-2">
+                                            <div className="d-flex align-items-center">
+                                                <Form.Check
+                                                    type="switch"
+                                                    id={`user-active-switch-${u.id}`}
+                                                    checked={u.is_active}
+                                                    onChange={() => handleToggleUserStatus(u.id, u.is_active)}
+                                                    className="me-2"
+                                                    disabled={currentUser?.role === 'apartment_admin' && u.role === 'admin'}
+                                                />
+                                                <Card.Title className="mb-0">{u.name}</Card.Title>
+                                            </div>
                                             <Button 
                                                 variant="link" 
                                                 size="sm" 
@@ -158,17 +205,17 @@ const UserManagement: React.FC<UserManagementProps> = ({ isActive }) => {
                                                 <FaEdit style={{ position: 'relative', top: '-1px' }}/>
                                             </Button>
                                         </div>
-                                        <Card.Subtitle className="mb-2 text-muted">{u.email}</Card.Subtitle>
-                                        <div className="mb-3">
+                                        <div className="mb-2 d-flex align-items-center">
                                             <Badge bg={
                                                 u.role === 'admin' ? 'danger' :
                                                 u.role === 'apartment_admin' ? 'primary' :
                                                 'secondary'
-                                            }>
-                                                {u.role === 'apartment_admin' ? 'Apartment Admin' : 
+                                            } className="me-2">
+                                                {u.role === 'apartment_admin' ? 'Apartment Admin' :
                                                  u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                                             </Badge>
                                         </div>
+                                        <p className="mb-2 text-muted">{u.email || 'No email'}</p>
                                         <div className="d-flex flex-wrap">
                                             <Button variant="outline-primary" size="sm" onClick={() => handlePinManagement(u)} className="me-2 mb-2">
                                                 <FaKey className="me-1" />PINs
